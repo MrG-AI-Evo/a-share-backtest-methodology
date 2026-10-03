@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "screening-run.schema.json",
+  "title": "Deterministic A-Share Screening Run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_id", "workflow", "as_of", "created_at",
+    "universe_count", "hard_filter_target", "factor_filter_target",
+    "scoring_version", "policy_version", "input_hash", "hard_filter",
+    "factor_filter", "exclusions", "warnings", "artifact_path"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "minLength": 12},
+    "workflow": {"const": "SCREENING"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "universe_count": {"type": "integer", "minimum": 0},
+    "hard_filter_target": {"type": "integer", "minimum": 1},
+    "factor_filter_target": {"type": "integer", "minimum": 1},
+    "scoring_version": {"type": "string", "minLength": 1},
+    "policy_version": {"type": "string", "minLength": 1},
+    "input_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "hard_filter": {"type": "array", "items": {"$ref": "#/$defs/candidate"}},
+    "factor_filter": {"type": "array", "items": {"$ref": "#/$defs/candidate"}},
+    "exclusions": {"type": "array", "items": {"$ref": "#/$defs/exclusion"}},
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "artifact_path": {"type": ["string", "null"]}
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "symbol", "name", "exchange", "industry", "stage", "rank",
+        "score", "factor_scores", "reason_codes"
+      ],
+      "properties": {
+        "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+        "name": {"type": "string", "minLength": 1},
+        "exchange": {"enum": ["SSE", "SZSE", "BSE"]},
+        "industry": {"type": ["string", "null"]},
+        "stage": {"enum": ["HARD_FILTER", "FACTOR_FILTER"]},
+        "rank": {"type": "integer", "minimum": 1},
+        "score": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "factor_scores": {"type": "object", "additionalProperties": {"type": "number"}},
+        "reason_codes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "name", "reason_codes"],
+      "properties": {
+        "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+        "name": {"type": "string", "minLength": 1},
+        "reason_codes": {
+          "type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true
+        }
+      }
+    }
+  }
+}

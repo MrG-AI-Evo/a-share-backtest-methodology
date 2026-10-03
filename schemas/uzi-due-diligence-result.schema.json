@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "uzi-due-diligence-result.schema.json",
+  "title": "Manual UZI Due Diligence Bridge Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_id", "bundle_id", "symbol", "as_of",
+    "adapter_version", "manual_trigger", "candidate_rank", "questions",
+    "findings", "new_evidence_ids", "duplicate_evidence_ids",
+    "conflicting_evidence_ids", "remaining_unknowns"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "minLength": 8},
+    "bundle_id": {"type": "string", "minLength": 8},
+    "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "adapter_version": {"type": "string", "minLength": 1},
+    "manual_trigger": {"const": true},
+    "candidate_rank": {"type": "integer", "minimum": 1, "maximum": 5},
+    "questions": {"type": "array", "minItems": 1, "maxItems": 7, "items": {"type": "string", "minLength": 1}},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+    "new_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "duplicate_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "conflicting_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "remaining_unknowns": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "classification", "evidence_ids", "confidence"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "classification": {"enum": ["FACT", "CALCULATION", "INFERENCE", "OPINION", "RISK", "UNKNOWN"]},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

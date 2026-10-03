@@ -1,0 +1,49 @@
+schema_version: "1.0.0"
+policy_version: "dividend-hurdle-single-601668-2026-09-14-pilot-v1"
+status: "MECHANISM_TEST_ONLY"
+base_policy:
+  path: "config/dividend-hurdle-backtest-v4.yaml"
+  policy_version: "dividend-hurdle-core20-2026-09-12-draft-v4"
+scope:
+  start_date: "2016-01-04"
+  end_date: "2025-12-31"
+  symbols:
+    - {symbol: "601668", name: "中国建筑", sector: "建筑", cohort: "USER_REQUESTED_SINGLE_SYMBOL"}
+sample_selection:
+  mode: "USER_REQUESTED_SINGLE_SYMBOL_MECHANISM_TEST"
+  selected_at: "2026-09-14T17:11:28+08:00"
+  hindsight_selection_bias: true
+  formal_performance_eligible: false
+  notes:
+    - "用户明确指定中国建筑（601668）进行单股独立机制测试。"
+    - "该结果与31股组合结果分离，不受组合席位和候选排名影响。"
+quality_inputs:
+  paths:
+    - "data/backtests/staging/20260911-231500-cninfo-quality-extraction-full-v2/annual-report-fact-candidates.jsonl"
+    - "data/backtests/staging/20260912-035000-601288-missing-reports-extract/annual-report-fact-candidates.jsonl"
+    - "data/backtests/staging/20260912-125000-quality-sample-2014-report-extract-v4/annual-report-fact-candidates.jsonl"
+    - "data/backtests/staging/20260912-137000-quality-sample-31-2014-extract-v2/annual-report-fact-candidates.jsonl"
+dividend_inputs:
+  events_path: "data/backtests/staging/20260912-140000-quality-sample-31-dividend-panel-v1/quality-sample-31-dividend-events-candidate.parquet"
+  fiscal_years_path: "data/backtests/staging/20260912-140000-quality-sample-31-dividend-panel-v1/quality-sample-31-dividend-fiscal-years-candidate.parquet"
+quality_gate:
+  mode: "CONSERVATIVE_ANNUAL_REPORT_PILOT"
+  rules:
+    - "latest_known_annual_report_audit_is_standard_unqualified"
+    - "no_extracted_material_going_concern_uncertainty"
+    - "latest_known_annual_report_parent_net_profit_is_positive"
+  extraction_failure_behavior: "FAIL_CLOSED"
+  formal_thresholds_frozen: false
+cd_signal:
+  mode: "MONTHLY_OBSERVED_PRODUCT_ABC_THEN_OTHER_BANK"
+  monthly_series_path: "data/backtests/staging/20260912-041500-cd-monthly-120m-v1/monthly-cd-rate-series.json"
+  missing_observation_behavior: "FAIL_CLOSED"
+  carry_or_imputation: false
+execution:
+  shares_per_entry: 1000
+  maximum_positions: 1
+  scheduler_status: "DISABLED_MANUAL_ONLY"
+change_control:
+  user_approved_at: "2026-09-14T17:11:28+08:00"
+  reason: "用户要求回测中国建筑（601668）；新增独立单股策略快照，不改写31股组合或核心V4规则。"
+  changes_formal_core20_policy: false

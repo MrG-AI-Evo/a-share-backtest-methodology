@@ -1,0 +1,35 @@
+schema_version: "1.0.0"
+suite_id: "v1-deterministic-golden-2026-08-25"
+status: AUTOMATED
+cases:
+  - {id: SCREEN-001, category: SCREENING, scenario: "普通A股通过硬门", expected: PASS, test: test_screening_is_deterministic_and_enforces_300_to_30}
+  - {id: SCREEN-002, category: SCREENING, scenario: "ST标的被排除", expected: RISK_STATUS_ST, test: test_screening_is_deterministic_and_enforces_300_to_30}
+  - {id: SCREEN-003, category: SCREENING, scenario: "停牌标的被排除", expected: TRADING_STATUS_SUSPENDED, test: test_screening_is_deterministic_and_enforces_300_to_30}
+  - {id: SCREEN-004, category: SCREENING, scenario: "上市历史不足120日被排除", expected: INSUFFICIENT_HISTORY, test: test_screening_edge_cases_fail_closed}
+  - {id: SCREEN-005, category: SCREENING, scenario: "数据质量C被排除", expected: DATA_QUALITY_BELOW_B, test: test_screening_edge_cases_fail_closed}
+  - {id: SCREEN-006, category: SCREENING, scenario: "非普通A股被排除", expected: UNSUPPORTED_ASSET_TYPE, test: test_screening_edge_cases_fail_closed}
+  - {id: SCREEN-007, category: SCREENING, scenario: "低流动性被排除", expected: INSUFFICIENT_LIQUIDITY, test: test_screening_is_deterministic_and_enforces_300_to_30}
+  - {id: SCREEN-008, category: SCREENING, scenario: "北交所普通股可进入硬门", expected: PASS, test: test_screening_edge_cases_fail_closed}
+  - {id: SCREEN-009, category: SCREENING, scenario: "输入逆序不改变候选", expected: DETERMINISTIC, test: test_screening_is_deterministic_and_enforces_300_to_30}
+  - {id: SCREEN-010, category: SCREENING, scenario: "同一产物禁止覆盖", expected: APPEND_ONLY, test: test_screening_is_deterministic_and_enforces_300_to_30}
+  - {id: ORDER-001, category: ORDER, scenario: "沪市主板100股起且100递增", expected: "100/100", test: test_lot_rules_cover_a_share_venues}
+  - {id: ORDER-002, category: ORDER, scenario: "深市主板100股起且100递增", expected: "100/100", test: test_lot_rules_cover_a_share_venues}
+  - {id: ORDER-003, category: ORDER, scenario: "创业板100股起且100递增", expected: "100/100", test: test_lot_rules_cover_a_share_venues}
+  - {id: ORDER-004, category: ORDER, scenario: "科创板200股起且1股递增", expected: "200/1", test: test_lot_rules_cover_a_share_venues}
+  - {id: ORDER-005, category: ORDER, scenario: "北交所100股起且1股递增", expected: "100/1", test: test_lot_rules_cover_a_share_venues}
+  - {id: ORDER-006, category: ORDER, scenario: "买入当日不可卖", expected: T_PLUS_ONE_FAIL, test: test_paper_ledger_is_idempotent_t_plus_one_and_hash_chained}
+  - {id: ORDER-007, category: ORDER, scenario: "部分成交受5%成交量上限", expected: PARTIAL, test: test_partial_fills_and_corporate_actions_keep_ledger_closed}
+  - {id: ORDER-008, category: ORDER, scenario: "公司行动重复应用幂等", expected: IDEMPOTENT, test: test_partial_fills_and_corporate_actions_keep_ledger_closed}
+  - {id: ORDER-009, category: ORDER, scenario: "账本现金持仓成交闭合", expected: RECONCILED, test: test_partial_fills_and_corporate_actions_keep_ledger_closed}
+  - {id: ORDER-010, category: ORDER, scenario: "真实券商与自动交易硬关闭", expected: DISABLED, test: test_health_forbids_trading_and_llm_api}
+  - {id: RESEARCH-001, category: RESEARCH, scenario: "研究卡只追加且幂等", expected: APPEND_ONLY, test: test_research_import_is_append_only_and_idempotent}
+  - {id: RESEARCH-002, category: RESEARCH, scenario: "未来研究时间拒绝", expected: TIME_TRAVEL_FAIL, test: test_research_import_rejects_future_time}
+  - {id: RESEARCH-003, category: RESEARCH, scenario: "未知证据引用拒绝", expected: UNKNOWN_EVIDENCE_FAIL, test: test_trading_agents_adapter_enforces_seven_roles_and_evidence}
+  - {id: RESEARCH-004, category: RESEARCH, scenario: "七角色缺失拒绝", expected: ROLE_CONTRACT_FAIL, test: test_trading_agents_adapter_enforces_seven_roles_and_evidence}
+  - {id: RESEARCH-005, category: RESEARCH, scenario: "UZI超出Top5拒绝", expected: TOP5_FAIL, test: test_uzi_adapter_rejects_non_top5_or_automatic_trigger}
+  - {id: RESEARCH-006, category: RESEARCH, scenario: "UZI非人工触发拒绝", expected: MANUAL_TRIGGER_FAIL, test: test_uzi_adapter_rejects_non_top5_or_automatic_trigger}
+  - {id: RESEARCH-007, category: RESEARCH, scenario: "单边研究拒绝", expected: BALANCE_FAIL, test: test_research_evaluator_rejects_future_and_one_sided_card}
+  - {id: RESEARCH-008, category: RESEARCH, scenario: "未来证据拒绝", expected: FUTURE_EVIDENCE_FAIL, test: test_research_evaluator_rejects_future_and_one_sided_card}
+  - {id: DATA-001, category: DATA, scenario: "复权不得使用未来公告", expected: POINT_IN_TIME, test: test_future_announcement_never_adjusts_history}
+  - {id: DATA-002, category: DATA, scenario: "交易日历越界失败关闭", expected: COVERAGE_FAIL, test: test_calendar_fails_closed_outside_coverage}
+

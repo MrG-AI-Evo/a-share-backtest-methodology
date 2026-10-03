@@ -1,0 +1,46 @@
+schema_version: 1.0.0
+experiment_id: ashare-v1-forward-60d
+status: NOT_STARTED
+timezone: Asia/Shanghai
+minimum_trading_days: 30
+target_trading_days: 60
+calibration_window:
+  start_day: 1
+  end_day: 10
+  one_declared_parameter_freeze_allowed: true
+frozen_validation_window:
+  start_day: 11
+  first_gate_day: 30
+  final_gate_day: 60
+initial_capital_cny: 1000000
+benchmarks:
+  - CSI300
+  - CANDIDATE_EQUAL_WEIGHT
+  - DETERMINISTIC_NO_LLM
+  - USER_MANUAL_IF_PRE_RECORDED
+hard_gates:
+  schema_pass_pct: 100
+  time_travel_incidents: 0
+  wrong_security_incidents: 0
+  ledger_reconciliation_pct: 100
+  hard_risk_violations: 0
+  decision_research_coverage_pct: 95
+daily_required_artifacts:
+  - market_radar
+  - research_queue
+  - decision_log
+  - paper_account_snapshot
+  - exception_log
+  - daily_review
+stop_conditions:
+  - TIME_TRAVEL
+  - WRONG_SECURITY
+  - LEDGER_NOT_RECONCILED
+  - MATERIAL_RULE_ERROR
+  - FABRICATED_CITATION
+  - TWO_CONSECUTIVE_DAYS_CRITICAL_DATA_FAILURE
+day_60_outcomes:
+  - GO_SIMULATION_AUTOMATION_ONLY
+  - ITERATE_AND_REFREEZE
+  - STOP_OR_REDESIGN
+real_trading_authorized: false

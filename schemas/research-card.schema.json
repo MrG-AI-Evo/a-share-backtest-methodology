@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research-card.schema.json",
+  "title": "A-Share Research Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "research_id", "symbol", "name", "exchange", "as_of",
+    "created_at", "horizon", "status", "score", "confidence", "summary",
+    "core_thesis", "bull_case", "bear_case", "catalysts", "risk_flags",
+    "invalidation_conditions", "confirmed_facts", "ai_inferences",
+    "unverified_items", "evidence", "data_freshness", "model_notes"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "record_type": {"enum": ["FORMAL_RESEARCH", "CONTRACT_BASELINE"]},
+    "research_id": {"type": "string", "minLength": 8},
+    "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+    "name": {"type": "string", "minLength": 1},
+    "exchange": {"enum": ["SSE", "SZSE", "BSE"]},
+    "as_of": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "horizon": {"enum": ["intraday", "5_trading_days", "20_trading_days", "60_trading_days", "long_term"]},
+    "status": {"enum": ["重点观察", "观察", "谨慎", "排除"]},
+    "score": {"type": "number", "minimum": 0, "maximum": 100},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "summary": {"type": "string", "minLength": 1, "maxLength": 300},
+    "core_thesis": {"type": "array", "minItems": 1, "maxItems": 5, "items": {"$ref": "#/$defs/claim"}},
+    "bull_case": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/claim"}},
+    "bear_case": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/claim"}},
+    "catalysts": {"type": "array", "items": {"$ref": "#/$defs/catalyst"}},
+    "risk_flags": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/risk"}},
+    "invalidation_conditions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/invalidation"}},
+    "confirmed_facts": {"type": "array", "items": {"$ref": "#/$defs/fact"}},
+    "ai_inferences": {"type": "array", "items": {"$ref": "#/$defs/inference"}},
+    "unverified_items": {"type": "array", "items": {"$ref": "#/$defs/unverified"}},
+    "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+    "data_freshness": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/freshness"}
+    },
+    "model_notes": {"type": "string"},
+    "scoring_version": {"type": ["string", "null"]},
+    "ruleset_version": {"type": ["string", "null"]},
+    "supersedes_research_id": {"type": ["string", "null"]},
+    "valid_until": {"type": ["string", "null"], "format": "date-time"}
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "evidence_ids", "confidence"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "as_of", "evidence_ids"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "as_of": {"type": "string", "format": "date-time"},
+        "evidence_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "inference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "confidence", "supporting_evidence_ids", "counter_evidence_ids"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "supporting_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "counter_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "unverified": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "impact", "verification_action", "deadline"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "impact": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+        "verification_action": {"type": "string", "minLength": 1},
+        "deadline": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "catalyst": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "window", "evidence_ids", "verified"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "window": {"type": ["string", "null"]},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}},
+        "verified": {"type": "boolean"}
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "severity", "evidence_ids"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "severity": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "invalidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["condition", "observable", "action"],
+      "properties": {
+        "condition": {"type": "string", "minLength": 1},
+        "observable": {"type": "string", "minLength": 1},
+        "action": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "title", "source_id", "source_uri", "published_at", "as_of", "retrieved_at", "quality"],
+      "properties": {
+        "evidence_id": {"type": "string", "minLength": 4},
+        "title": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "minLength": 1},
+        "source_uri": {"type": "string", "minLength": 1},
+        "published_at": {"type": ["string", "null"], "format": "date-time"},
+        "as_of": {"type": "string", "format": "date-time"},
+        "retrieved_at": {"type": "string", "format": "date-time"},
+        "quality": {"enum": ["A", "B", "C", "D", "F"]},
+        "excerpt": {"type": ["string", "null"], "maxLength": 1000}
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as_of", "retrieved_at", "stale", "source_ids"],
+      "properties": {
+        "as_of": {"type": "string", "format": "date-time"},
+        "retrieved_at": {"type": "string", "format": "date-time"},
+        "stale": {"type": "boolean"},
+        "source_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

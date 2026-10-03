@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "20261003-133100-eval-source-export",
+  "workflow": "EVAL",
+  "scope": "CODE_AND_METHODOLOGY_EXPORT_ONLY",
+  "market_session": "NOT_APPLICABLE",
+  "trading_date": null,
+  "as_of": "2026-10-03T13:31:00+08:00",
+  "model_version": "UNKNOWN_NOT_EXPOSED",
+  "prompt_version": "user-source-only-github-export-20261003-v1",
+  "policy_version": "dividend-hurdle-core20-2026-09-12-draft-v4",
+  "ruleset_version": "2026-08-25-paper-v1",
+  "original_business_data_included": false,
+  "strategy_rule_schema_files_byte_identical": 44,
+  "dependency_lockfiles_byte_identical": true,
+  "checks": {
+    "pnpm_check": "PASS",
+    "python_tests_passed": 104,
+    "web_unit_tests_passed": 2,
+    "e2e_passed": 13,
+    "e2e_skipped_mobile_hardware_keyboard": 2,
+    "recovery_check": "PASS_EMPTY_LOCAL_ACCOUNT",
+    "health": "PASS",
+    "backtest_runs": 0,
+    "formal_backtest_executable": false,
+    "open_readiness_blockers": 13,
+    "runtime_status": "DISABLED",
+    "execution_mode": "MANUAL_ONLY"
+  },
+  "changes": [
+    "apps/api/app/runtime/service.py",
+    "apps/api/app/runtime/models.py",
+    "apps/api/app/runtime/repository.py",
+    "apps/api/app/cli/soak_check.py",
+    "apps/api/app/cli/deterministic_task_run.py",
+    "apps/api/app/api/routes/runtime.py",
+    "apps/api/pyproject.toml: mypy target matches Python 3.12",
+    "tests: isolated synthetic contracts, type annotations and precise E2E locator/timeout",
+    "docs and root export instructions"
+  ],
+  "known_limits": [
+    "No original data or performance delivered",
+    "WorkBuddy data adapter is not configured or validated",
+    "No Windows execution validation",
+    "No formal 24-hour soak",
+    "Touch emulation is not physical device validation",
+    "Historical financial quality and data coverage blockers remain open"
+  ],
+  "confidence": "HIGH_FOR_EXPORT_BOUNDARY_AND_MACOS_ENGINEERING_CHECKS_ONLY",
+  "validity": "Applies only to this exported source version; rerun after code, policy, dependency or data adapter changes"
+}

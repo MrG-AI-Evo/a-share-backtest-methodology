@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "deterministic-runtime-config.schema.json",
+  "title": "DeterministicRuntimeConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "runtime_id", "runtime_version", "status", "execution_mode", "safety", "activation_gate", "output", "tasks"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "runtime_id": {"const": "a-share-deterministic-runtime"},
+    "runtime_version": {"type": "string", "minLength": 8},
+    "status": {"const": "DISABLED"},
+    "execution_mode": {"const": "MANUAL_ONLY"},
+    "safety": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scheduler_enabled", "launch_agent_enabled", "cron_enabled", "codex_heartbeat_enabled", "automatic_test_enabled", "llm_api_enabled", "web_ai_chat_enabled", "llm_can_write_ledger", "llm_can_trade", "synthetic_historical_data_allowed", "real_broker_enabled", "automatic_trading_enabled"],
+      "properties": {
+        "scheduler_enabled": {"const": false}, "launch_agent_enabled": {"const": false}, "cron_enabled": {"const": false}, "codex_heartbeat_enabled": {"const": false}, "automatic_test_enabled": {"const": false}, "llm_api_enabled": {"const": false}, "web_ai_chat_enabled": {"const": false}, "llm_can_write_ledger": {"const": false}, "llm_can_trade": {"const": false}, "synthetic_historical_data_allowed": {"const": false}, "real_broker_enabled": {"const": false}, "automatic_trading_enabled": {"const": false}
+      }
+    },
+    "activation_gate": {"type": "object", "additionalProperties": false, "required": ["user_approval_required", "required_approval_fields", "approval_record_required_before_scheduling"], "properties": {"user_approval_required": {"const": true}, "required_approval_fields": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"type": "string"}}, "approval_record_required_before_scheduling": {"const": true}}},
+    "output": {"type": "object", "additionalProperties": false, "required": ["run_artifact_dir", "exception_package_dir", "immutable_append_only", "exception_package_for_manual_ai_review_only"], "properties": {"run_artifact_dir": {"type": "string"}, "exception_package_dir": {"type": "string"}, "immutable_append_only": {"const": true}, "exception_package_for_manual_ai_review_only": {"const": true}}},
+    "tasks": {"type": "array", "minItems": 7, "items": {"type": "object", "additionalProperties": false, "required": ["id", "enabled", "manual_command_allowed", "cadence", "trigger", "description"], "properties": {"id": {"enum": ["DATA_UPDATE_VALIDATE", "DAILY_EXIT_CHECK", "MONTHLY_CANDIDATE_SCREEN", "NEXT_OPEN_PAPER_FILL", "CORPORATE_ACTIONS_LEDGER", "ANNUAL_PNL_SNAPSHOT", "EXCEPTION_EVIDENCE_PACKAGE"]}, "enabled": {"const": false}, "manual_command_allowed": {"const": true}, "cadence": {"type": "string", "minLength": 3}, "trigger": {"type": "string", "minLength": 3}, "description": {"type": "string", "minLength": 8}}}}
+  }
+}

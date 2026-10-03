@@ -1,0 +1,164 @@
+schema_version: "1.0.0"
+ruleset_version: "2026-08-25-paper-v1"
+timezone: "Asia/Shanghai"
+status: "PAPER_V1_FAIL_CLOSED_BASELINE"
+disclaimer: >-
+  本文件是模拟交易实现的规则清单和已核对基线，不是完整交易所规则正文。
+  每次实现/升级必须从交易所生效规则和证券逐日参考参数生成可执行快照；
+  不能仅按代码前缀或本文件静态值下单。
+
+global:
+  live_broker_enabled: false
+  automatic_trading_enabled: false
+  default_currency: CNY
+  timezone: Asia/Shanghai
+  settlement:
+    ordinary_a_share_sellable_after_buy: NEXT_TRADING_DAY
+    note: "按资产、交易所和业务类型核验；V1 不覆盖 ETF、债券、两融等差异。"
+  regular_sessions:
+    opening_call_auction: "09:15:00-09:25:00"
+    morning_continuous: "09:30:00-11:30:00"
+    afternoon_continuous: "13:00:00-14:57:00"
+    closing_call_auction: "14:57:00-15:00:00"
+    note: "撤单、盘后固定价格、临停等细节按交易所生效规则独立实现。"
+  tick_size:
+    ordinary_a_share_cny: 0.01
+    source_required_per_security: true
+  lot_resolution:
+    use_security_reference_parameters_first: true
+    reject_when_unknown: true
+  price_limit_resolution:
+    use_exchange_daily_reference_first: true
+    reject_when_unknown: true
+  no_price_limit:
+    common_case: "IPO first 5 trading days for SSE/SZSE main/STAR/ChiNext under current registration rules"
+    warning: "还存在退市整理首日、重新上市等情形；必须按证券当日参数判定。"
+
+venues:
+  SSE_MAIN:
+    ordinary_price_limit_pct: 10
+    risk_warning_price_limit_pct:
+      value: 10
+      effective_from: "2026-07-06"
+      note: "2026修订将上交所主板风险警示股票由5%调整为10%；历史回测必须按日期版本化。"
+    buy_lot:
+      minimum: 100
+      increment: 100
+    odd_lot_sell: "余额不足100股部分一次性申报卖出"
+    continuous_limit_price_cage:
+      buy: "<= max(reference*102%, reference+10*tick)"
+      sell: ">= min(reference*98%, reference-10*tick)"
+    after_hours_fixed_price:
+      effective_from: "2026-07-06"
+      v1_modeling: false
+  SSE_STAR:
+    ordinary_price_limit_pct: 20
+    buy_lot:
+      minimum: 200
+      increment: 1
+    odd_lot_sell: "余额不足200股部分一次性申报卖出"
+    continuous_limit_price_cage:
+      buy: "<= reference*102%"
+      sell: ">= reference*98%"
+    ipo_no_limit_trading_days: 5
+  SZSE_MAIN:
+    ordinary_price_limit_pct: 10
+    risk_warning_price_limit_pct:
+      value: null
+      status: VERIFY_FROM_2026_EFFECTIVE_RULE_AND_DAILY_PARAMETERS
+    buy_lot:
+      minimum: 100
+      increment: 100
+    odd_lot_sell: "余额不足100股部分一次性申报卖出"
+    continuous_limit_price_cage:
+      status: "VERIFY_SCOPE_FROM_2026_RULE"
+  SZSE_CHINEXT:
+    ordinary_price_limit_pct: 20
+    risk_warning_price_limit_pct:
+      value: null
+      status: USE_DAILY_REFERENCE_NOT_NAME_HEURISTIC
+    buy_lot:
+      minimum: 100
+      increment: 100
+    odd_lot_sell: "余额不足100股部分一次性申报卖出"
+    continuous_limit_price_cage:
+      buy: "<= reference*102%"
+      sell: ">= reference*98%"
+    ipo_no_limit_trading_days: 5
+  BSE:
+    ordinary_price_limit_pct: 30
+    buy_lot:
+      minimum: 100
+      increment: 1
+    odd_lot_sell: "余额不足100股部分一次性申报卖出"
+    ipo_no_limit_trading_days: 1
+    intraday_halt_no_limit_day:
+      triggers_pct_from_open: [30, 60, -30, -60]
+      default_minutes: 10
+    price_cage:
+      note: "连续竞价基准价格±5%或10个最小变动单位，按正式规则解析。"
+
+order_validation_sequence:
+  - security_identity
+  - asset_type_supported
+  - trading_calendar_and_session
+  - listing_risk_warning_suspension_status
+  - t_plus_one_sellable_quantity
+  - quantity_lot_and_maximum
+  - tick_size
+  - daily_price_limit_and_price_cage
+  - cash_and_fees
+  - position_and_portfolio_risk
+  - liquidity_and_fill_model
+  - human_approval
+
+paper_fill_policy:
+  v1_supported_session: REGULAR_AUCTION_ONLY
+  signal_known_after_close_earliest_fill: NEXT_TRADING_DAY
+  buy_at_limit_up: "NO_FILL unless explicit executable liquidity evidence"
+  sell_at_limit_down: "NO_FILL unless explicit executable liquidity evidence"
+  suspended: NO_FILL
+  max_participation_of_daily_volume_pct: 5
+  partial_fills_enabled: true
+  slippage_model: "configurable_by_price_and_liquidity; stress-tested"
+
+fees:
+  status: "CONFIG_REQUIRED_VERIFY_WITH_BROKER_AND_EFFECTIVE_TAX_RULES"
+  commission:
+    rate: null
+    minimum_cny: null
+  stamp_duty:
+    side: SELL
+    rate: null
+    note: "实现时按当期国家税务规则填写；不可把历史税率用于全部回测。"
+  transfer_and_exchange_fees:
+    rate: null
+    note: "按市场、时期和券商口径配置。"
+
+sources:
+  - id: SSE_TRADING_RULES_2026
+    url: "https://www.sse.com.cn/lawandrules/sselawsrules2025/stocks/exchange/c/c_20260424_10816482.shtml"
+    effective_from: "2026-07-06"
+  - id: SZSE_TRADING_RULES_2026_NOTICE
+    url: "https://www.szse.cn/lawrules/rule/trade/current/t20260424_620190.html"
+    effective_from: "2026-07-06"
+  - id: BSE_TRADING_RULES_2026
+    url: "https://www.bse.cn/jygl_list/200028217.html"
+    effective_from: "2026-07-06"
+  - id: MOF_STAMP_DUTY_2023_39
+    url: "https://jx.mof.gov.cn/xxgk/zhengcefagui/202309/t20230904_3905337.htm"
+    effective_from: "2023-08-28"
+  - id: CHINACLEAR_SSE_FEES_2025
+    url: "https://www.chinaclear.cn/zdjs/fbzyls/202506/9d22b74d9f2e40edb67b44d1f6596f18/files/上海市场证券登记结算业务收费及代收税费一览表.pdf"
+    verified_at: "2026-08-25"
+
+change_control:
+  last_verified_at: "2026-08-25"
+  check_frequency: MONTHLY_AND_EVENT_DRIVEN
+  required_outputs:
+    - source_snapshot
+    - effective_date
+    - affected_assets
+    - migration_test
+    - historical_backtest_rule_version
+  fail_closed_when_changed_or_unknown: true

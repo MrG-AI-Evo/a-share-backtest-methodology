@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "deterministic-task-run.schema.json",
+  "title": "DeterministicTaskRun",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "task_id", "execution_mode", "status", "requested_at", "finished_at", "execution_duration_ms", "as_of", "data_cutoff", "runtime_version", "ruleset_version", "policy_version", "input_hash", "counts", "blockers", "exceptions", "summary", "artifact_hash"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"}, "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{11,159}$"}, "task_id": {"enum": ["DATA_UPDATE_VALIDATE", "DAILY_EXIT_CHECK", "MONTHLY_CANDIDATE_SCREEN", "NEXT_OPEN_PAPER_FILL", "CORPORATE_ACTIONS_LEDGER", "ANNUAL_PNL_SNAPSHOT", "EXCEPTION_EVIDENCE_PACKAGE"]}, "execution_mode": {"const": "MANUAL_COMMAND"}, "status": {"enum": ["COMPLETE", "BLOCKED", "FAILED"]}, "requested_at": {"type": "string", "format": "date-time"}, "finished_at": {"type": "string", "format": "date-time"}, "execution_duration_ms": {"type": "integer", "minimum": 0}, "as_of": {"type": "string", "format": "date-time"}, "data_cutoff": {"type": ["string", "null"]}, "runtime_version": {"type": "string"}, "ruleset_version": {"type": "string"}, "policy_version": {"type": "string"}, "input_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "counts": {"type": "object"}, "blockers": {"type": "array"}, "exceptions": {"type": "array"}, "summary": {"type": "string", "minLength": 1}, "artifact_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

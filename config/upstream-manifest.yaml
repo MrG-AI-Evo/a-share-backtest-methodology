@@ -1,0 +1,53 @@
+schema_version: "1.0.0"
+verified_at: "2026-09-10"
+runtime_policy: "V1_MANUAL_BRIDGE_NO_LLM_API"
+upstreams:
+  - id: a-share-skill
+    repository: "https://github.com/shouldnotappearcalm/a-share-skill"
+    ref: "main"
+    commit: null
+    license: MIT
+    status: CONTRACT_ADAPTER_READY_NOT_INSTALLED
+    role: MARKET_TECHNICAL_PAPER_REFERENCE
+  - id: TradingAgents-astock
+    repository: "https://github.com/simonlin1212/TradingAgents-astock"
+    ref: "main"
+    commit: null
+    license: Apache-2.0
+    status: MANUAL_BRIDGE_READY_NOT_RUNTIME_INSTALLED
+    role: PRIMARY_RESEARCH_FRAMEWORK
+    reason: "上游运行要求 LLM API；V1 只吸收七角色结构并导入结构化结果。"
+  - id: UZI-Skill
+    repository: "https://github.com/wbh604/UZI-Skill"
+    ref: "main"
+    commit: null
+    license: MIT
+    status: MANUAL_BRIDGE_READY_NOT_RUNTIME_INSTALLED
+    role: TOP_3_TO_5_DUE_DILIGENCE_ONLY
+    reason: "仅人工触发；禁止全市场和每日机械运行。"
+  - id: mootdx
+    repository: "https://github.com/mootdx/mootdx"
+    ref: "v0.11.7"
+    commit: "96c3d42"
+    license: MIT
+    status: OPTIONAL_RUNTIME_ADAPTER
+    role: PUBLIC_TDX_MARKET_DATA
+  - id: akshare
+    repository: "https://github.com/akfamily/akshare"
+    ref: "1.18.94"
+    commit: null
+    license: MIT
+    status: INSTALLED_RUNTIME_DISABLED_LIVE_PROBE_FAILED
+    role: UNIFIED_PUBLIC_DATA_SUPPLEMENT
+    reason: "2026-08-25 本机实探 stock_zh_a_spot_em 连接东方财富底层端点失败；保持禁用，不能冒充独立二源。"
+  - id: astock-data-toolkit
+    repository: "https://github.com/tiantianlaolao/astock-data-toolkit"
+    ref: "main"
+    commit: "80dbdba675201163b0d6ab36633971093f3b4be6"
+    license: MIT
+    status: MANUAL_STAGING_COLLECTOR
+    role: SHSZ_2021_PLUS_PUBLIC_DAILY_REFERENCE
+    reason: "仅作为人工启动的公开日线采集参考；不启用其 cron/后台脚本，不直接写正式回测库，采集产物缺少 known_at 时保持 STAGING_ONLY。"
+notes:
+  - "commit 为 null 的仓库在真正安装前必须用 git ls-remote 冻结精确 SHA；当前桥梁不执行其代码。"
+  - "任何上游安装都不得引入 OpenAI/DeepSeek/Gemini SDK 或真实券商路径。"

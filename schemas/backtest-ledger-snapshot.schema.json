@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "backtest-ledger-snapshot.schema.json",
+  "title": "BacktestLedgerSnapshot",
+  "description": "按需注资回测的总账户、单股生命周期子账和逐笔事件快照；供确定性后端生成、Web 只读展示。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "policy_version",
+    "run_purpose",
+    "scenario",
+    "account_id",
+    "as_of",
+    "valuation_cutoff",
+    "currency",
+    "run_status",
+    "account_summary",
+    "performance",
+    "security_ledgers",
+    "account_cash_flows",
+    "reconciliation",
+    "data_quality"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "minLength": 12},
+    "policy_version": {"type": "string", "minLength": 8},
+    "run_purpose": {"enum": ["FORMAL_BACKTEST", "MECHANISM_TEST"]},
+    "scenario": {"enum": ["OPTIMISTIC", "BASE", "STRESS"]},
+    "account_id": {"type": "string", "minLength": 4},
+    "as_of": {"type": "string", "format": "date-time"},
+    "valuation_cutoff": {"type": "string", "format": "date-time"},
+    "currency": {"const": "CNY"},
+    "run_status": {"enum": ["RUNNING", "CHECKPOINT", "COMPLETE", "DEGRADED", "BLOCKED", "FAILED"]},
+    "account_summary": {"$ref": "#/$defs/accountSummary"},
+    "performance": {"$ref": "#/$defs/performance"},
+    "security_ledgers": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/securityLedger"}
+    },
+    "account_cash_flows": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/accountCashFlow"}
+    },
+    "reconciliation": {"$ref": "#/$defs/reconciliation"},
+    "data_quality": {"$ref": "#/$defs/dataQuality"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"run_purpose": {"const": "FORMAL_BACKTEST"}},
+        "required": ["run_purpose"]
+      },
+      "then": {
+        "properties": {
+          "data_quality": {
+            "properties": {
+              "raw_data_mode": {"const": "REAL_POINT_IN_TIME"},
+              "synthetic_raw_observation_count": {"const": 0}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"run_purpose": {"const": "MECHANISM_TEST"}},
+        "required": ["run_purpose"]
+      },
+      "then": {
+        "properties": {
+          "data_quality": {
+            "properties": {"raw_data_mode": {"const": "TEST_FIXTURE"}}
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "moneyNonNegative": {"type": "number", "minimum": 0},
+    "ratioOrNull": {"type": ["number", "null"]},
+    "dateTimeOrNull": {"type": ["string", "null"], "format": "date-time"},
+    "accountSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cumulative_external_contributions_cny",
+        "cumulative_external_withdrawals_cny",
+        "net_external_contributions_cny",
+        "cumulative_buy_gross_cny",
+        "cumulative_buy_transaction_costs_cny",
+        "cumulative_sell_gross_cny",
+        "cumulative_sell_transaction_costs_cny",
+        "cumulative_dividend_gross_cny",
+        "cumulative_dividend_tax_cny",
+        "cash_cny",
+        "dividend_receivable_cny",
+        "other_receivables_cny",
+        "liabilities_cny",
+        "market_value_cny",
+        "total_assets_cny",
+        "equity_cny",
+        "active_position_count",
+        "maximum_position_count",
+        "vacant_slot_count",
+        "unresolved_valuation_count"
+      ],
+      "properties": {
+        "cumulative_external_contributions_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_external_withdrawals_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "net_external_contributions_cny": {"type": "number"},
+        "cumulative_buy_gross_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_buy_transaction_costs_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_sell_gross_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_sell_transaction_costs_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_dividend_gross_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_dividend_tax_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cash_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "dividend_receivable_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "other_receivables_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "liabilities_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "market_value_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "total_assets_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "equity_cny": {"type": "number"},
+        "active_position_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "maximum_position_count": {"const": 20},
+        "vacant_slot_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "unresolved_valuation_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realized_pnl_cny",
+        "unrealized_pnl_cny",
+        "total_pnl_cny",
+        "simple_return",
+        "mwrr_xirr_annualized",
+        "twr_cumulative",
+        "maximum_drawdown",
+        "calculation_status"
+      ],
+      "properties": {
+        "realized_pnl_cny": {"type": "number"},
+        "unrealized_pnl_cny": {"type": "number"},
+        "total_pnl_cny": {"type": "number"},
+        "simple_return": {"$ref": "#/$defs/ratioOrNull"},
+        "mwrr_xirr_annualized": {"$ref": "#/$defs/ratioOrNull"},
+        "twr_cumulative": {"$ref": "#/$defs/ratioOrNull"},
+        "maximum_drawdown": {"$ref": "#/$defs/ratioOrNull"},
+        "calculation_status": {"enum": ["VALID", "PARTIAL", "UNAVAILABLE", "BLOCKED_BY_RECONCILIATION"]}
+      }
+    },
+    "securityLedger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "symbol",
+        "exchange",
+        "name",
+        "ownership_type",
+        "position_state",
+        "current_episode_id",
+        "original_entry_target_shares",
+        "current_quantity",
+        "sellable_quantity",
+        "cumulative_external_contribution_attributed_cny",
+        "cumulative_buy_gross_cny",
+        "cumulative_buy_transaction_costs_cny",
+        "cumulative_buy_cost_including_fees_cny",
+        "cumulative_sell_gross_cny",
+        "cumulative_sell_transaction_costs_cny",
+        "cumulative_net_sell_proceeds_cny",
+        "cumulative_dividend_gross_cny",
+        "cumulative_dividend_tax_cny",
+        "cumulative_net_dividends_cny",
+        "current_dividend_receivable_cny",
+        "current_cost_basis_cny",
+        "current_raw_price_cny",
+        "price_as_of",
+        "current_market_value_cny",
+        "valuation_status",
+        "last_observable_reference_value_cny",
+        "last_observable_reference_at",
+        "lifecycle_value_cny",
+        "realized_pnl_cny",
+        "unrealized_pnl_cny",
+        "total_pnl_cny",
+        "operation_count",
+        "operations"
+      ],
+      "properties": {
+        "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+        "exchange": {"enum": ["SSE", "SZSE", "BSE"]},
+        "name": {"type": "string", "minLength": 1, "maxLength": 40},
+        "ownership_type": {"enum": ["CENTRAL_SOE", "LOCAL_SOE", "PRIVATE", "PUBLIC_COLLECTIVE", "FOREIGN", "OTHER", "UNKNOWN"]},
+        "position_state": {"enum": ["NEVER_HELD", "OPEN", "EXIT_QUEUED", "CLOSED", "TERMINATED_UNRESOLVED"]},
+        "current_episode_id": {"type": ["string", "null"]},
+        "original_entry_target_shares": {"const": 1000},
+        "current_quantity": {"type": "integer", "minimum": 0},
+        "sellable_quantity": {"type": "integer", "minimum": 0},
+        "cumulative_external_contribution_attributed_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_buy_gross_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_buy_transaction_costs_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_buy_cost_including_fees_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_sell_gross_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_sell_transaction_costs_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_net_sell_proceeds_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_dividend_gross_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_dividend_tax_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cumulative_net_dividends_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "current_dividend_receivable_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "current_cost_basis_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "current_raw_price_cny": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "price_as_of": {"$ref": "#/$defs/dateTimeOrNull"},
+        "current_market_value_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "valuation_status": {"enum": ["CURRENT", "STALE", "UNRESOLVED_ZERO_LOWER_BOUND", "NO_POSITION"]},
+        "last_observable_reference_value_cny": {"type": ["number", "null"], "minimum": 0},
+        "last_observable_reference_at": {"$ref": "#/$defs/dateTimeOrNull"},
+        "lifecycle_value_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "realized_pnl_cny": {"type": "number"},
+        "unrealized_pnl_cny": {"type": "number"},
+        "total_pnl_cny": {"type": "number"},
+        "operation_count": {"type": "integer", "minimum": 0},
+        "operations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/operation"}
+        }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "episode_id",
+        "event_type",
+        "status",
+        "signal_at",
+        "occurred_at",
+        "known_at",
+        "side",
+        "quantity_delta",
+        "cash_delta_cny",
+        "price_cny",
+        "gross_amount_cny",
+        "cost_breakdown",
+        "resulting_quantity",
+        "signal_snapshot",
+        "reason",
+        "evidence_ids"
+      ],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 8},
+        "episode_id": {"type": ["string", "null"]},
+        "event_type": {
+          "enum": [
+            "SCREENED",
+            "ENTRY_SIGNAL",
+            "EXIT_SIGNAL",
+            "ORDER_QUEUED",
+            "ORDER_REJECTED",
+            "ORDER_EXPIRED",
+            "BUY_FILL",
+            "SELL_FILL",
+            "CONTRIBUTION_ATTRIBUTION",
+            "DIVIDEND_RECEIVABLE",
+            "DIVIDEND_PAYMENT",
+            "DIVIDEND_TAX",
+            "CORPORATE_ACTION",
+            "VALUATION",
+            "DATA_GAP",
+            "TERMINAL_RECOVERY"
+          ]
+        },
+        "status": {"enum": ["RECORDED", "PENDING", "FILLED", "REJECTED", "CANCELLED", "UNRESOLVED"]},
+        "signal_at": {"$ref": "#/$defs/dateTimeOrNull"},
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "known_at": {"type": "string", "format": "date-time"},
+        "side": {"type": ["string", "null"], "enum": ["BUY", "SELL", null]},
+        "quantity_delta": {"type": "integer"},
+        "cash_delta_cny": {"type": "number"},
+        "price_cny": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "gross_amount_cny": {"type": ["number", "null"], "minimum": 0},
+        "cost_breakdown": {"$ref": "#/$defs/costBreakdown"},
+        "resulting_quantity": {"type": "integer", "minimum": 0},
+        "signal_snapshot": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/signalSnapshot"}
+          ]
+        },
+        "reason": {"type": "string", "minLength": 1},
+        "evidence_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "costBreakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "broker_commission_cny",
+        "stamp_duty_cny",
+        "transfer_fee_cny",
+        "exchange_and_regulatory_fees_cny",
+        "other_cash_fees_cny",
+        "dividend_tax_cny",
+        "cash_transaction_costs_cny",
+        "slippage_attribution_cny"
+      ],
+      "properties": {
+        "broker_commission_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "stamp_duty_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "transfer_fee_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "exchange_and_regulatory_fees_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "other_cash_fees_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "dividend_tax_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "cash_transaction_costs_cny": {"$ref": "#/$defs/moneyNonNegative"},
+        "slippage_attribution_cny": {"$ref": "#/$defs/moneyNonNegative"}
+      }
+    },
+    "signalSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "d_ttm_cny_per_share",
+        "d_med3_cny_per_share",
+        "d_cons_cny_per_share",
+        "raw_close_cny",
+        "dividend_yield",
+        "cd_signal_rate",
+        "cd_tenor_years",
+        "cd_rate_quality",
+        "hurdle_rate",
+        "yield_buffer",
+        "maximum_buy_price_cny"
+      ],
+      "properties": {
+        "d_ttm_cny_per_share": {"type": "number", "minimum": 0},
+        "d_med3_cny_per_share": {"type": "number", "minimum": 0},
+        "d_cons_cny_per_share": {"type": "number", "minimum": 0},
+        "raw_close_cny": {"type": "number", "exclusiveMinimum": 0},
+        "dividend_yield": {"type": "number", "minimum": 0},
+        "cd_signal_rate": {"type": ["number", "null"], "minimum": 0},
+        "cd_tenor_years": {"type": ["integer", "null"], "enum": [3, 5, null]},
+        "cd_rate_quality": {"enum": ["OBSERVED", "TENOR_FALLBACK", "SYNTHETIC_CARRY", "UNAVAILABLE"]},
+        "hurdle_rate": {"type": ["number", "null"], "minimum": 0},
+        "yield_buffer": {"type": ["number", "null"]},
+        "maximum_buy_price_cny": {"type": ["number", "null"], "exclusiveMinimum": 0}
+      }
+    },
+    "accountCashFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flow_id", "occurred_at", "flow_type", "amount_cny", "caused_by_operation_id", "attributed_symbol"],
+      "properties": {
+        "flow_id": {"type": "string", "minLength": 8},
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "flow_type": {"enum": ["CONTRIBUTION", "WITHDRAWAL"]},
+        "amount_cny": {"type": "number", "exclusiveMinimum": 0},
+        "caused_by_operation_id": {"type": ["string", "null"]},
+        "attributed_symbol": {"type": ["string", "null"], "pattern": "^[0-9]{6}$"}
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "tolerance_cny", "checks"],
+      "properties": {
+        "status": {"enum": ["PASS", "FAIL"]},
+        "tolerance_cny": {"const": 0.01},
+        "checks": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "status", "difference", "unit", "formula"],
+            "properties": {
+              "name": {"enum": ["CASH_ROLLFORWARD", "POSITION_QUANTITY", "ASSET_EQUITY", "TOTAL_PNL", "SECURITY_SUBLEDGER_SUM"]},
+              "status": {"enum": ["PASS", "FAIL"]},
+              "difference": {"type": "number"},
+              "unit": {"enum": ["CNY", "SHARES"]},
+              "formula": {"type": "string", "minLength": 4}
+            }
+          }
+        }
+      }
+    },
+    "dataQuality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "raw_data_mode",
+        "synthetic_raw_observation_count",
+        "modeled_execution_assumption_count",
+        "data_cutoff",
+        "time_travel_check",
+        "unit_check",
+        "ledger_check",
+        "stale_source_ids",
+        "missing_critical_fields",
+        "unresolved_valuation_symbols",
+        "notes"
+      ],
+      "properties": {
+        "status": {"enum": ["VALID", "STALE", "DEGRADED", "INVALID"]},
+        "raw_data_mode": {"enum": ["REAL_POINT_IN_TIME", "TEST_FIXTURE"]},
+        "synthetic_raw_observation_count": {"type": "integer", "minimum": 0},
+        "modeled_execution_assumption_count": {"type": "integer", "minimum": 0},
+        "data_cutoff": {"type": "string", "format": "date-time"},
+        "time_travel_check": {"enum": ["PASS", "FAIL"]},
+        "unit_check": {"enum": ["PASS", "FAIL"]},
+        "ledger_check": {"enum": ["PASS", "FAIL"]},
+        "stale_source_ids": {"type": "array", "items": {"type": "string"}},
+        "missing_critical_fields": {"type": "array", "items": {"type": "string"}},
+        "unresolved_valuation_symbols": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[0-9]{6}$"}
+        },
+        "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

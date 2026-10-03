@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.a-share.test/schemas/cninfo-annual-report-extraction.schema.json",
+  "title": "CNInfo annual report deterministic extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "parser_version",
+    "source",
+    "document",
+    "audit_opinion",
+    "going_concern",
+    "metric_candidates",
+    "temporal",
+    "formal_status"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "parser_version": {"type": "string", "minLength": 1},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "issuer_name", "announcement_id", "title", "known_at", "pdf_url", "path", "bytes", "sha256"],
+      "properties": {
+        "symbol": {"type": "string", "pattern": "^[036][0-9]{5}$"},
+        "issuer_name": {"type": "string", "minLength": 1},
+        "announcement_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "known_at": {"type": "string", "format": "date-time"},
+        "pdf_url": {"type": "string", "format": "uri"},
+        "path": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 1025},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page_count", "text_char_count", "report_year", "extractable", "encrypted", "page_errors"],
+      "properties": {
+        "page_count": {"type": "integer", "minimum": 0},
+        "text_char_count": {"type": "integer", "minimum": 0},
+        "report_year": {"type": ["integer", "null"], "minimum": 1990, "maximum": 2100},
+        "extractable": {"type": "boolean"},
+        "encrypted": {"type": "boolean"},
+        "page_errors": {"type": "integer", "minimum": 0}
+      }
+    },
+    "audit_opinion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "evidence_page", "evidence_excerpt", "evidence_sha256"],
+      "properties": {
+        "classification": {
+          "enum": ["STANDARD_UNQUALIFIED", "UNQUALIFIED_WITH_EMPHASIS", "QUALIFIED", "ADVERSE", "DISCLAIMER", "NOT_FOUND", "UNREADABLE"]
+        },
+        "evidence_page": {"type": ["integer", "null"], "minimum": 1},
+        "evidence_excerpt": {"type": ["string", "null"], "maxLength": 800},
+        "evidence_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "going_concern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence_pages", "evidence_excerpts"],
+      "properties": {
+        "status": {"enum": ["FLAG_FOUND", "NOT_FOUND_IN_EXTRACTED_TEXT", "UNREADABLE"]},
+        "evidence_pages": {"type": "array", "items": {"type": "integer", "minimum": 1}, "uniqueItems": true},
+        "evidence_excerpts": {"type": "array", "items": {"type": "string", "maxLength": 800}, "maxItems": 5}
+      }
+    },
+    "metric_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["metric_id", "raw_value", "unit_context", "page", "status"],
+        "properties": {
+          "metric_id": {"type": "string", "minLength": 1},
+          "raw_value": {"type": "string", "minLength": 1},
+          "unit_context": {"type": ["string", "null"]},
+          "page": {"type": "integer", "minimum": 1},
+          "status": {"const": "CANDIDATE_NEEDS_VALIDATION"}
+        }
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["period_end", "known_at", "revision_role", "supersedes_announcement_id"],
+      "properties": {
+        "period_end": {"type": ["string", "null"], "format": "date"},
+        "known_at": {"type": "string", "format": "date-time"},
+        "revision_role": {"enum": ["ORIGINAL_OR_UNRESOLVED", "REVISION", "SUPERSEDED"]},
+        "supersedes_announcement_id": {"type": ["string", "null"]}
+      }
+    },
+    "formal_status": {"const": "STAGING_ONLY_NOT_FORMAL_BACKTEST_INPUT"}
+  }
+}

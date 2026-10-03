@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "backtest-dataset-manifest.schema.json",
+  "title": "BacktestDatasetManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "manifest_id", "dataset", "raw_data_mode", "file_path", "sha256", "row_count", "minimum_effective_date", "maximum_effective_date", "columns", "source_ids", "license", "retrieved_at", "created_at"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "manifest_id": {"type": "string", "minLength": 12},
+    "dataset": {"enum": ["prices", "security_master", "security_status", "dividends", "dividend_fiscal_years", "financial_facts", "corporate_actions", "cd_rates", "fee_rules"]},
+    "raw_data_mode": {"enum": ["REAL_POINT_IN_TIME", "TEST_FIXTURE"]},
+    "file_path": {"type": "string", "pattern": "^data/backtests/parquet/[^/]+\\.parquet$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "row_count": {"type": "integer", "minimum": 1},
+    "minimum_effective_date": {"type": "string", "format": "date"},
+    "maximum_effective_date": {"type": "string", "format": "date"},
+    "columns": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "source_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usage_scope", "redistribution_allowed", "evidence_uri"],
+      "properties": {
+        "usage_scope": {"const": "LOCAL_RESEARCH_BACKTEST"},
+        "redistribution_allowed": {"type": "boolean"},
+        "evidence_uri": {"type": "string", "minLength": 1}
+      }
+    },
+    "coverage_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full_primary_window", "point_in_time", "no_synthetic", "entity_scope_complete", "calendar_complete", "checked_by", "evidence_uri"],
+      "properties": {
+        "full_primary_window": {"type": "boolean"},
+        "point_in_time": {"type": "boolean"},
+        "no_synthetic": {"type": "boolean"},
+        "entity_scope_complete": {"type": "boolean"},
+        "calendar_complete": {"type": "boolean"},
+        "checked_by": {"type": "string", "minLength": 1},
+        "evidence_uri": {"type": "string", "minLength": 1}
+      }
+    },
+    "retrieved_at": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

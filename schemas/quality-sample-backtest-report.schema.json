@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.a-share.test/schemas/quality-sample-backtest-report.schema.json",
+  "title": "Quality sample backtest visual report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "report_id", "status", "generated_at", "source_run", "portfolio", "annual", "stocks", "data_quality", "audit", "formal_blockers"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "report_id": {"type": "string", "minLength": 1},
+    "status": {"const": "MECHANISM_TEST_ONLY"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "sha256", "policy_version", "start_date", "end_date", "as_of"],
+      "properties": {
+        "run_id": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "policy_version": {"type": "string"}, "start_date": {"type": "string", "format": "date"},
+        "end_date": {"type": "string", "format": "date"}, "as_of": {"type": "string", "format": "date-time"}
+      }
+    },
+    "portfolio": {"type": "object"},
+    "annual": {"type": "array", "items": {"type": "object"}},
+    "stocks": {"type": "array", "items": {"type": "object"}, "minItems": 1},
+    "data_quality": {"type": "object"},
+    "audit": {"type": "object"},
+    "formal_blockers": {"type": "array", "items": {"type": "string"}}
+  }
+}

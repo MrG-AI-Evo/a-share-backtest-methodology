@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "paper-order.schema.json",
+  "title": "PaperOrder",
+  "description": "V1 本地模拟订单响应契约；不存在真实券商字段或执行权限。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "order_id", "account_id", "symbol", "name", "side", "order_type",
+    "limit_price", "quantity", "filled_quantity", "status", "reason",
+    "research_version", "expected_horizon", "risk_notes",
+    "invalidation_conditions", "invalidation_price", "ruleset_version",
+    "fee_schedule_version", "risk_checks", "created_at", "earliest_fill_at",
+    "approved_at", "rejected_at", "rejection_reason", "fills"
+  ],
+  "properties": {
+    "order_id": {"type": "string", "minLength": 8},
+    "account_id": {"const": "paper-v1"},
+    "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 40},
+    "side": {"enum": ["BUY", "SELL"]},
+    "order_type": {"const": "LIMIT_SIM"},
+    "limit_price": {"type": "number", "exclusiveMinimum": 0},
+    "quantity": {"type": "integer", "minimum": 1},
+    "filled_quantity": {"type": "integer", "minimum": 0},
+    "status": {
+      "enum": ["PENDING_APPROVAL", "QUEUED", "PARTIAL", "FILLED", "REJECTED", "CANCELLED", "EXPIRED"]
+    },
+    "reason": {"type": "string", "minLength": 4},
+    "research_version": {"type": ["string", "null"]},
+    "expected_horizon": {"type": "string", "minLength": 1},
+    "risk_notes": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "invalidation_conditions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "invalidation_price": {"type": ["number", "null"], "exclusiveMinimum": 0},
+    "ruleset_version": {"type": "string", "minLength": 1},
+    "fee_schedule_version": {"type": "string", "minLength": 1},
+    "risk_checks": {"type": "array", "items": {"$ref": "#/$defs/riskCheck"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "earliest_fill_at": {"type": "string", "format": "date-time"},
+    "approved_at": {"type": ["string", "null"], "format": "date-time"},
+    "rejected_at": {"type": ["string", "null"], "format": "date-time"},
+    "rejection_reason": {"type": ["string", "null"]},
+    "fills": {"type": "array", "items": {"$ref": "#/$defs/fill"}}
+  },
+  "$defs": {
+    "riskCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check", "status", "detail"],
+      "properties": {
+        "check": {"type": "string"},
+        "status": {"enum": ["PASS", "FAIL", "REVIEW"]},
+        "detail": {"type": "string"}
+      }
+    },
+    "fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fill_id", "order_id", "filled_at", "price", "quantity",
+        "gross_amount_cny", "commission_cny", "stamp_duty_cny",
+        "transfer_fee_cny", "slippage_cny", "total_fees_cny", "source",
+        "source_timestamp"
+      ],
+      "properties": {
+        "fill_id": {"type": "string"},
+        "order_id": {"type": "string"},
+        "filled_at": {"type": "string", "format": "date-time"},
+        "price": {"type": "number", "exclusiveMinimum": 0},
+        "quantity": {"type": "integer", "minimum": 1},
+        "gross_amount_cny": {"type": "number", "minimum": 0},
+        "commission_cny": {"type": "number", "minimum": 0},
+        "stamp_duty_cny": {"type": "number", "minimum": 0},
+        "transfer_fee_cny": {"type": "number", "minimum": 0},
+        "slippage_cny": {"type": "number", "minimum": 0},
+        "total_fees_cny": {"type": "number", "minimum": 0},
+        "source": {"type": "string"},
+        "source_timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

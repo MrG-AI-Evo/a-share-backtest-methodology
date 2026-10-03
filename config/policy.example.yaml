@@ -1,0 +1,54 @@
+schema_version: "1.0.0"
+policy_version: "paper-v1-draft"
+mode: research_and_paper_only
+initial_cash_cny: 1000000
+benchmark: CSI300
+
+risk:
+  risk_per_trade_pct_nav: 0.50
+  risk_per_trade_hard_max_pct_nav: 0.75
+  initial_position_max_pct_nav: 8
+  single_stock_hard_max_pct_nav: 12
+  industry_max_pct_nav: 25
+  top5_max_pct_nav: 50
+  gross_exposure_min_pct_nav: 20
+  gross_exposure_max_pct_nav: 70
+  risk_off_exposure_max_pct_nav: 30
+  max_new_positions_per_day: 2
+  weekly_turnover_soft_max_pct: 35
+  stop_new_buys_daily_loss_pct: 1.5
+  caution_drawdown_pct: 5
+  risk_off_drawdown_pct: 8
+  freeze_drawdown_pct: 12
+
+screening:
+  min_median_daily_turnover_cny_20d: null
+  max_standard_research_per_day: 5
+  max_deep_dd_per_day: 2
+  scoring_version: score-v1-draft
+
+models:
+  quick_role: null
+  deep_role: null
+  extraction_temperature: 0
+  synthesis_temperature: 0.2
+  max_retries: 2
+  cache_enabled: true
+
+data:
+  tushare_enabled: false
+  fail_closed_on_identity_price_status: true
+  raw_retention: "append_only"
+  timezone: Asia/Shanghai
+
+execution:
+  live_broker_enabled: false
+  auto_approve: false
+  regular_auction_only: true
+  max_daily_volume_participation_pct: 5
+  default_slippage_bps: null
+  stress_slippage_bps: null
+  fee_schedule_version: null
+
+notes:
+  - "所有 null 参数在实现前通过样本与当期规则冻结；不得静默使用猜测值。"

@@ -1,0 +1,69 @@
+schema_version: "1.0.0"
+policy_id: "dividend-hurdle-core20"
+policy_version: "dividend-hurdle-core20-2026-08-27-draft-v2"
+status: "DRAFT_NOT_EXECUTABLE"
+workflow: "BACKTEST"
+
+base_policy:
+  path: "config/dividend-hurdle-backtest-v1.yaml"
+  policy_version: "dividend-hurdle-core20-2026-08-25-draft-v1"
+  sha256: "5db2dde63a3bc32cbcfbfcaf8e0c49d03f1928ec9fd8447589d1518c536dd563"
+  inheritance: "ALL_ECONOMIC_RULES_EXCEPT_SIMULATION_WINDOW"
+
+change_control:
+  run_id: "20260827-100422-backtest-v2-window"
+  created_at: "2026-08-27T10:04:22+08:00"
+  reason: "按用户确认将主结果固定为十个完整年份，并把2026年从主结果中拆为独立扩展观察。"
+  changed_fields:
+    - "simulation_windows.primary.end_date"
+    - "simulation_windows.extension"
+  economic_rule_change: false
+  test_result_retuning_forbidden: true
+
+simulation_windows:
+  primary:
+    label: "TEN_COMPLETE_YEARS"
+    start_date: "2016-01-04"
+    end_date: "2025-12-31"
+    include_in_primary_performance: true
+  extension:
+    label: "2026_OUT_OF_SAMPLE_OBSERVATION"
+    start_date: "2026-01-01"
+    end_date_policy: "LATEST_REAL_POINT_IN_TIME_DATA"
+    configured_data_cutoff: "2026-08-24"
+    include_in_primary_performance: false
+  timezone: "Asia/Shanghai"
+  calendar: "POINT_IN_TIME_A_SHARE"
+
+formal_run_gate:
+  raw_data_mode: "REAL_POINT_IN_TIME"
+  synthetic_raw_observation_count: 0
+  require_all_blockers_closed: true
+  fail_closed: true
+
+execution_blockers:
+  - id: "CD_HISTORY"
+    category: "EXTERNAL_DATA"
+    status: "OPEN"
+    description: "四大行历史大额存单观察值、有效期、来源和期限降级数据未形成完整可审计数据集。"
+  - id: "QUALITY_GATE"
+    category: "RULE_AND_POINT_IN_TIME_DATA"
+    status: "OPEN"
+    description: "通用及分行业质量门数值阈值、生效期和历史点时证据尚未冻结。"
+  - id: "FEE_TAX_RULES"
+    category: "RULE_AND_POINT_IN_TIME_DATA"
+    status: "OPEN"
+    description: "2016—2025费用、红利税、交易规则及滑点分层尚未完整冻结。"
+  - id: "POINT_IN_TIME_COVERAGE"
+    category: "EXTERNAL_DATA"
+    status: "OPEN"
+    description: "全市场、退市股、历史ST/停牌、财务首次公开和公司行动覆盖尚未通过验收。"
+  - id: "LEDGER_IMPLEMENTATION"
+    category: "LOCAL_ENGINEERING"
+    status: "IN_PROGRESS"
+    description: "确定性历史事件引擎、总账户和单股子账正在建设。"
+  - id: "WEB_INSPECTOR"
+    category: "LOCAL_ENGINEERING"
+    status: "IN_PROGRESS"
+    description: "回测列表、详情、检查点、子账和证据查看器正在建设。"
+

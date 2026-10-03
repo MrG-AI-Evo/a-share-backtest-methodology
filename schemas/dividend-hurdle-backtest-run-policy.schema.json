@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dividend-hurdle-backtest-run-policy.schema.json",
+  "title": "DividendHurdleBacktestRunPolicyV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_id", "policy_version", "status", "workflow", "base_policy", "change_control", "simulation_windows", "formal_run_gate", "execution_blockers"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "policy_id": {"const": "dividend-hurdle-core20"},
+    "policy_version": {
+      "enum": [
+        "dividend-hurdle-core20-2026-08-27-draft-v2",
+        "dividend-hurdle-core20-2026-08-27-draft-v3",
+        "dividend-hurdle-core20-2026-09-12-draft-v4"
+      ]
+    },
+    "status": {"enum": ["DRAFT_NOT_EXECUTABLE", "FROZEN_EXECUTABLE", "RETIRED"]},
+    "workflow": {"const": "BACKTEST"},
+    "base_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "policy_version", "sha256", "inheritance"],
+      "properties": {
+        "path": {"const": "config/dividend-hurdle-backtest-v1.yaml"},
+        "policy_version": {"type": "string", "minLength": 8},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "inheritance": {
+          "enum": [
+            "ALL_ECONOMIC_RULES_EXCEPT_SIMULATION_WINDOW",
+            "ALL_ECONOMIC_RULES_EXCEPT_SIMULATION_WINDOW_AND_EXPLICIT_USER_EXCLUSIONS"
+          ]
+        }
+      }
+    },
+    "change_control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "created_at", "reason", "changed_fields", "economic_rule_change", "test_result_retuning_forbidden"],
+      "properties": {
+        "run_id": {"type": "string", "minLength": 12},
+        "created_at": {"type": "string", "format": "date-time"},
+        "reason": {"type": "string", "minLength": 8},
+        "changed_fields": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "economic_rule_change": {"type": "boolean"},
+        "test_result_retuning_forbidden": {"const": true}
+      }
+    },
+    "simulation_windows": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "extension", "timezone", "calendar"],
+      "properties": {
+        "primary": {
+          "type": "object", "additionalProperties": false,
+          "required": ["label", "start_date", "end_date", "include_in_primary_performance"],
+          "properties": {
+            "label": {"const": "TEN_COMPLETE_YEARS"},
+            "start_date": {"const": "2016-01-04"},
+            "end_date": {"const": "2025-12-31"},
+            "include_in_primary_performance": {"const": true}
+          }
+        },
+        "extension": {
+          "type": "object", "additionalProperties": false,
+          "required": ["label", "start_date", "end_date_policy", "configured_data_cutoff", "include_in_primary_performance"],
+          "properties": {
+            "label": {"const": "2026_OUT_OF_SAMPLE_OBSERVATION"},
+            "start_date": {"const": "2026-01-01"},
+            "end_date_policy": {"const": "LATEST_REAL_POINT_IN_TIME_DATA"},
+            "configured_data_cutoff": {"type": "string", "format": "date"},
+            "include_in_primary_performance": {"const": false}
+          }
+        },
+        "timezone": {"const": "Asia/Shanghai"},
+        "calendar": {"const": "POINT_IN_TIME_A_SHARE"}
+      }
+    },
+    "universe_exclusions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "symbol",
+          "exchange",
+          "name",
+          "scope",
+          "reason_code",
+          "reason",
+          "effective_from",
+          "effective_to",
+          "evidence_refs",
+          "approved_at"
+        ],
+        "properties": {
+          "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+          "exchange": {"enum": ["SSE", "SZSE"]},
+          "name": {"type": "string", "minLength": 1},
+          "scope": {"const": "ALL_SIMULATION_WINDOWS"},
+          "reason_code": {"const": "USER_APPROVED_SOURCE_DOCUMENT_GAP"},
+          "reason": {"type": "string", "minLength": 12},
+          "effective_from": {"type": "string", "format": "date"},
+          "effective_to": {"type": "string", "format": "date"},
+          "evidence_refs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "approved_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "formal_run_gate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["raw_data_mode", "synthetic_raw_observation_count", "require_all_blockers_closed", "fail_closed"],
+      "properties": {
+        "raw_data_mode": {"const": "REAL_POINT_IN_TIME"},
+        "synthetic_raw_observation_count": {"const": 0},
+        "require_all_blockers_closed": {"const": true},
+        "fail_closed": {"const": true}
+      }
+    },
+    "execution_blockers": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "category", "status", "description"],
+        "properties": {
+          "id": {"type": "string", "minLength": 3},
+          "category": {"enum": ["EXTERNAL_DATA", "RULE_AND_POINT_IN_TIME_DATA", "LOCAL_ENGINEERING", "USER_DECISION"]},
+          "status": {"enum": ["OPEN", "IN_PROGRESS", "CLOSED"]},
+          "description": {"type": "string", "minLength": 8}
+        }
+      }
+    }
+  }
+}

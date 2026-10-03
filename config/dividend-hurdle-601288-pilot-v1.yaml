@@ -1,0 +1,26 @@
+schema_version: "1.0.0"
+policy_version: "dividend-hurdle-601288-abc-single-bank-2026-09-12-pilot-v1"
+status: "MECHANISM_TEST_ONLY"
+base_policy:
+  path: "config/dividend-hurdle-backtest-v4.yaml"
+  policy_version: "dividend-hurdle-core20-2026-09-12-draft-v4"
+scope:
+  symbol: "601288"
+  name: "农业银行"
+  start_date: "2016-01-04"
+  end_date: "2025-12-31"
+cd_signal:
+  mode: "SINGLE_BANK_OBSERVED_PRODUCT"
+  bank: "ABC"
+  bank_name: "中国农业银行"
+  minimum_bank_count: 1
+  tenor_policy: "2016-2017_3Y;2018+_5Y_THEN_3Y"
+  missing_observation_behavior: "NO_NEW_ENTRY_AND_NO_FORCED_EXIT"
+  carry_or_imputation: false
+change_control:
+  user_approved_at: "2026-09-12T03:41:20+08:00"
+  reason: "用户明确允许单独采用工商银行、四大行、招商银行或民生银行；现有中国农业银行官方历史产品序列覆盖最高，故选择ABC。"
+  changes_formal_core20_policy: false
+  formal_result_eligible: false
+  supersedes_pilot_run: "20260912-043000-single-601288-real-pilot-final"
+

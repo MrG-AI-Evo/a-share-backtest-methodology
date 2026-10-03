@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-bundle.schema.json",
+  "title": "Point-in-time Evidence Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "bundle_id", "symbol", "name", "exchange", "as_of",
+    "data_cutoff", "created_at", "evidence", "conflicts", "missing_domains",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "bundle_id": {"type": "string", "minLength": 8},
+    "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+    "name": {"type": "string", "minLength": 1},
+    "exchange": {"enum": ["SSE", "SZSE", "BSE"]},
+    "as_of": {"type": "string", "format": "date-time"},
+    "data_cutoff": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+    "conflicts": {"type": "array", "items": {"$ref": "#/$defs/conflict"}},
+    "missing_domains": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id", "domain", "statement", "source_id", "source_tier",
+        "source_uri", "published_at", "as_of", "retrieved_at", "quality",
+        "independent_event_id", "content_hash"
+      ],
+      "properties": {
+        "evidence_id": {"type": "string", "minLength": 4},
+        "domain": {
+          "enum": ["MARKET", "FUNDAMENTAL", "FILING", "NEWS", "POLICY", "SENTIMENT", "RULE", "OTHER"]
+        },
+        "statement": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "minLength": 1},
+        "source_tier": {"enum": ["P0", "P1", "P2", "P3", "P4"]},
+        "source_uri": {"type": "string", "minLength": 1},
+        "published_at": {"type": ["string", "null"], "format": "date-time"},
+        "as_of": {"type": "string", "format": "date-time"},
+        "retrieved_at": {"type": "string", "format": "date-time"},
+        "quality": {"enum": ["A", "B", "C", "D", "F"]},
+        "independent_event_id": {"type": ["string", "null"]},
+        "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "evidence_ids", "resolution"],
+      "properties": {
+        "field": {"type": "string", "minLength": 1},
+        "evidence_ids": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+        "resolution": {"enum": ["UNRESOLVED", "SOURCE_PRIORITY", "WITHIN_TOLERANCE"]}
+      }
+    }
+  }
+}

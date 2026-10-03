@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "api-envelope.schema.json",
+  "title": "Local Web API Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data", "meta", "error"],
+  "properties": {
+    "data": {},
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_id", "generated_at", "data_state", "sources", "warnings"],
+      "properties": {
+        "request_id": {"type": "string", "minLength": 8},
+        "generated_at": {"type": "string", "format": "date-time"},
+        "data_state": {"enum": ["live", "delayed", "stale", "unavailable", "demo"]},
+        "sources": {"type": "array", "items": {"$ref": "#/$defs/source"}},
+        "warnings": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "error": {"type": ["object", "null"]}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider", "source_url", "fetched_at", "source_timestamp", "state",
+        "age_seconds", "notes"
+      ],
+      "properties": {
+        "provider": {"type": "string"},
+        "source_url": {"type": ["string", "null"]},
+        "fetched_at": {"type": "string", "format": "date-time"},
+        "source_timestamp": {"type": ["string", "null"], "format": "date-time"},
+        "state": {"enum": ["live", "delayed", "stale", "unavailable", "demo"]},
+        "age_seconds": {"type": ["integer", "null"], "minimum": 0},
+        "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

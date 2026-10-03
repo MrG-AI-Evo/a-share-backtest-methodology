@@ -1,0 +1,24 @@
+schema_version: "1.0.0"
+policy_version: "screening-policy-2026-08-25-v1"
+scoring_version: "deterministic-score-2026-08-25-v1"
+targets:
+  hard_filter: 300
+  factor_filter: 30
+hard_filters:
+  supported_asset_type: ORDINARY_A_SHARE
+  allowed_data_quality: [A, B]
+  minimum_history_days: 120
+  minimum_avg_amount_20d_cny: 50000000
+  allowed_trading_status: [NORMAL]
+  allowed_risk_status: [NORMAL]
+weights:
+  quality: 0.20
+  value: 0.15
+  trend: 0.25
+  liquidity: 0.15
+  catalyst: 0.10
+  risk: 0.15
+missing_value_penalty: 8.0
+notes:
+  - "数量是上限，不满足硬门时允许少于目标，禁止降低门槛凑数。"
+  - "risk 子分越高代表风险越低；由原始 risk_score 反向换算。"

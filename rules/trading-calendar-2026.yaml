@@ -1,0 +1,36 @@
+schema_version: "1.0.0"
+calendar_version: "SSE-SZSE-BSE-2026-v1"
+timezone: "Asia/Shanghai"
+valid_from: "2026-01-01"
+valid_until: "2026-12-31"
+weekday_sessions: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY]
+closed_weekdays:
+  - "2026-01-01"
+  - "2026-01-02"
+  - "2026-02-16"
+  - "2026-02-17"
+  - "2026-02-18"
+  - "2026-02-19"
+  - "2026-02-20"
+  - "2026-02-23"
+  - "2026-04-06"
+  - "2026-05-01"
+  - "2026-05-04"
+  - "2026-05-05"
+  - "2026-06-19"
+  - "2026-09-25"
+  - "2026-10-01"
+  - "2026-10-02"
+  - "2026-10-05"
+  - "2026-10-06"
+  - "2026-10-07"
+sources:
+  - id: SSE_2026_HOLIDAY_NOTICE
+    url: "https://www.sse.com.cn/disclosure/announcement/general/c/c_20251222_10802507.shtml"
+    published_at: "2025-12-22"
+  - id: SZSE_2026_HOLIDAY_NOTICE
+    url: "https://www.szse.cn/disclosure/notice/general/t20251222_618087.html"
+    published_at: "2025-12-22"
+notes:
+  - "周六、周日始终按休市处理；调休工作日不会自动成为交易日。"
+  - "仅覆盖 2026 年；超出覆盖范围必须 fail closed，不得退回自然日近似。"

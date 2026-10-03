@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "corporate-action.schema.json",
+  "title": "Point-in-time Corporate Action",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "action_id", "symbol", "action_type", "announced_at",
+    "effective_date", "cash_per_share_cny", "share_multiplier", "price_factor",
+    "source_id", "source_uri", "retrieved_at", "quality", "notes"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "action_id": {"type": "string", "minLength": 8},
+    "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+    "action_type": {"enum": ["CASH_DIVIDEND", "SHARE_MULTIPLIER", "PRICE_FACTOR"]},
+    "announced_at": {"type": "string", "format": "date-time"},
+    "effective_date": {"type": "string", "format": "date"},
+    "cash_per_share_cny": {"type": ["number", "null"], "minimum": 0},
+    "share_multiplier": {"type": ["number", "null"], "exclusiveMinimum": 0},
+    "price_factor": {"type": "number", "exclusiveMinimum": 0},
+    "source_id": {"type": "string", "minLength": 1},
+    "source_uri": {"type": "string", "minLength": 1},
+    "retrieved_at": {"type": "string", "format": "date-time"},
+    "quality": {"enum": ["A", "B"]},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"action_type": {"const": "CASH_DIVIDEND"}}},
+      "then": {"properties": {"cash_per_share_cny": {"type": "number", "exclusiveMinimum": 0}}}
+    },
+    {
+      "if": {"properties": {"action_type": {"const": "SHARE_MULTIPLIER"}}},
+      "then": {"properties": {"share_multiplier": {"type": "number", "exclusiveMinimum": 0}}}
+    }
+  ]
+}

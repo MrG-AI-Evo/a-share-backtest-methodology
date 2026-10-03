@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.a-share.test/schemas/screening-invalidation.schema.json",
+  "title": "Append-only screening run invalidation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "invalidation_id", "run_id", "invalidated_at", "reason", "replacement_run_id"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "invalidation_id": {"type": "string", "minLength": 8},
+    "run_id": {"type": "string", "minLength": 8},
+    "invalidated_at": {"type": "string", "format": "date-time"},
+    "reason": {"type": "string", "minLength": 10},
+    "replacement_run_id": {"type": ["string", "null"]}
+  }
+}

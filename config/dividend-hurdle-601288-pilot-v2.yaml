@@ -1,0 +1,33 @@
+schema_version: "1.0.0"
+policy_version: "dividend-hurdle-601288-monthly-bank-fallback-2026-09-12-pilot-v2"
+status: "MECHANISM_TEST_ONLY"
+base_policy:
+  path: "config/dividend-hurdle-backtest-v4.yaml"
+  policy_version: "dividend-hurdle-core20-2026-09-12-draft-v4"
+scope:
+  symbol: "601288"
+  name: "农业银行"
+  start_date: "2016-01-04"
+  end_date: "2025-12-31"
+cd_signal:
+  mode: "MONTHLY_OBSERVED_PRODUCT_ABC_THEN_OTHER_BANK"
+  monthly_series_path: "data/backtests/staging/20260912-041500-cd-monthly-120m-v1/monthly-cd-rate-series.json"
+  bank_priority:
+    - "ABC"
+    - "ICBC"
+    - "BOC"
+    - "CCB"
+    - "AUDITED_OTHER_BANK"
+  minimum_bank_count: 1
+  tenor_policy: "2016-2017_3Y;2018+_5Y_THEN_3Y"
+  monthly_checkpoint: "FIRST_TRADING_DAY_ON_OR_AFTER_SOURCE_KNOWN_AT"
+  missing_observation_behavior: "FAIL_CLOSED"
+  carry_or_imputation: false
+  averaging: false
+change_control:
+  user_approved_at: "2026-09-12T12:00:00+08:00"
+  reason: "用户要求农行缺失月份使用其他银行，确保2016-2025每月至少有一条真实大额存单利率。"
+  changes_formal_core20_policy: false
+  formal_result_eligible: false
+  supersedes_policy_version: "dividend-hurdle-601288-abc-single-bank-2026-09-12-pilot-v1"
+

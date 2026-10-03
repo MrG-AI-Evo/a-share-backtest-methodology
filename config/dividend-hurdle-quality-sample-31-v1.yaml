@@ -1,0 +1,88 @@
+schema_version: "1.0.0"
+policy_version: "dividend-hurdle-quality-sample-31-2026-09-12-pilot-v1"
+status: "MECHANISM_TEST_ONLY"
+base_policy:
+  path: "config/dividend-hurdle-backtest-v4.yaml"
+  policy_version: "dividend-hurdle-core20-2026-09-12-draft-v4"
+scope:
+  start_date: "2016-01-04"
+  end_date: "2025-12-31"
+  symbols:
+    - {symbol: "601288", name: "农业银行", sector: "银行", cohort: "ORIGINAL_11"}
+    - {symbol: "000651", name: "格力电器", sector: "家电", cohort: "ORIGINAL_11"}
+    - {symbol: "601298", name: "青岛港", sector: "港口", cohort: "ORIGINAL_11"}
+    - {symbol: "600887", name: "伊利股份", sector: "食品饮料", cohort: "ORIGINAL_11"}
+    - {symbol: "600019", name: "宝钢股份", sector: "钢铁", cohort: "ORIGINAL_11"}
+    - {symbol: "600377", name: "宁沪高速", sector: "高速", cohort: "ORIGINAL_11"}
+    - {symbol: "600886", name: "国投电力", sector: "电力", cohort: "ORIGINAL_11"}
+    - {symbol: "600660", name: "福耀玻璃", sector: "汽车零部件", cohort: "ORIGINAL_11"}
+    - {symbol: "600900", name: "长江电力", sector: "电力", cohort: "ORIGINAL_11"}
+    - {symbol: "601166", name: "兴业银行", sector: "银行", cohort: "ORIGINAL_11"}
+    - {symbol: "600919", name: "江苏银行", sector: "银行", cohort: "ORIGINAL_11"}
+    - {symbol: "600398", name: "海澜之家", sector: "服饰", cohort: "ADDED_20"}
+    - {symbol: "002032", name: "苏泊尔", sector: "家用电器", cohort: "ADDED_20"}
+    - {symbol: "002677", name: "浙江美大", sector: "家用电器", cohort: "ADDED_20"}
+    - {symbol: "000895", name: "双汇发展", sector: "食品", cohort: "ADDED_20"}
+    - {symbol: "600015", name: "华夏银行", sector: "银行", cohort: "ADDED_20"}
+    - {symbol: "000858", name: "五粮液", sector: "白酒", cohort: "ADDED_20"}
+    - {symbol: "600395", name: "盘江股份", sector: "煤炭", cohort: "ADDED_20"}
+    - {symbol: "601668", name: "中国建筑", sector: "建筑", cohort: "ADDED_20"}
+    - {symbol: "600820", name: "隧道股份", sector: "建筑", cohort: "ADDED_20"}
+    - {symbol: "600085", name: "同仁堂", sector: "中成药", cohort: "ADDED_20"}
+    - {symbol: "601390", name: "中国中铁", sector: "建筑", cohort: "ADDED_20"}
+    - {symbol: "000828", name: "东莞控股", sector: "路桥", cohort: "ADDED_20"}
+    - {symbol: "000338", name: "潍柴动力", sector: "汽车零部件", cohort: "ADDED_20"}
+    - {symbol: "000012", name: "南玻A", sector: "玻璃", cohort: "ADDED_20"}
+    - {symbol: "600352", name: "浙江龙盛", sector: "化工", cohort: "ADDED_20"}
+    - {symbol: "600000", name: "浦发银行", sector: "银行", cohort: "ADDED_20"}
+    - {symbol: "600801", name: "华新建材", sector: "建材", cohort: "ADDED_20"}
+    - {symbol: "600104", name: "上汽集团", sector: "汽车", cohort: "ADDED_20"}
+    - {symbol: "601601", name: "中国太保", sector: "保险", cohort: "ADDED_20"}
+    - {symbol: "601688", name: "华泰证券", sector: "证券", cohort: "ADDED_20"}
+sample_selection:
+  mode: "FIXED_DATA_COMPLETENESS_FIRST_CONVENIENCE_SAMPLE"
+  selected_at: "2026-09-12T13:22:42+08:00"
+  hindsight_selection_bias: true
+  formal_performance_eligible: false
+  added_20_requirements:
+    price_window_endpoints_present: true
+    minimum_price_days: 2300
+    minimum_dividend_fiscal_years: 10
+    prewindow_dividend_years_crosschecked: [2012, 2013, 2014]
+    annual_report_years_required: 10
+    conservative_quality_rows_all_pass: true
+  notes:
+    - "新增20只先按资料完整度过滤，再参考近年现金分红覆盖；不代表历史时点可知的全市场选股结果。"
+    - "东方电气继续按V4排除；北交所不在本样本内。"
+quality_inputs:
+  paths:
+    - "data/backtests/staging/20260911-231500-cninfo-quality-extraction-full-v2/annual-report-fact-candidates.jsonl"
+    - "data/backtests/staging/20260912-035000-601288-missing-reports-extract/annual-report-fact-candidates.jsonl"
+    - "data/backtests/staging/20260912-125000-quality-sample-2014-report-extract-v4/annual-report-fact-candidates.jsonl"
+    - "data/backtests/staging/20260912-137000-quality-sample-31-2014-extract-v2/annual-report-fact-candidates.jsonl"
+dividend_inputs:
+  events_path: "data/backtests/staging/20260912-140000-quality-sample-31-dividend-panel-v1/quality-sample-31-dividend-events-candidate.parquet"
+  fiscal_years_path: "data/backtests/staging/20260912-140000-quality-sample-31-dividend-panel-v1/quality-sample-31-dividend-fiscal-years-candidate.parquet"
+quality_gate:
+  mode: "CONSERVATIVE_ANNUAL_REPORT_PILOT"
+  rules:
+    - "latest_known_annual_report_audit_is_standard_unqualified"
+    - "no_extracted_material_going_concern_uncertainty"
+    - "latest_known_annual_report_parent_net_profit_is_positive"
+  extraction_failure_behavior: "FAIL_CLOSED"
+  formal_thresholds_frozen: false
+cd_signal:
+  mode: "MONTHLY_OBSERVED_PRODUCT_ABC_THEN_OTHER_BANK"
+  monthly_series_path: "data/backtests/staging/20260912-041500-cd-monthly-120m-v1/monthly-cd-rate-series.json"
+  missing_observation_behavior: "FAIL_CLOSED"
+  carry_or_imputation: false
+execution:
+  shares_per_entry: 1000
+  maximum_positions: 20
+  scheduler_status: "DISABLED_MANUAL_ONLY"
+change_control:
+  user_approved_at: "2026-09-12T13:12:00+08:00"
+  reason: "用户要求在现有11只资料较完整样本基础上，再增加20只资料完整标的进行同口径机制测试。"
+  rejected_candidates:
+    - {symbol: "000568", name: "泸州老窖", reason: "2014年保守财报质量门未通过，按资料完整度优先规则替换。"}
+  changes_formal_core20_policy: false

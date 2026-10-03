@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "research_id": "300476-20260824T150000+0800",
+  "symbol": "300476",
+  "name": "胜宏科技",
+  "exchange": "SZSE",
+  "as_of": "2026-08-24T15:00:00+08:00",
+  "created_at": "2026-08-24T18:30:00+08:00",
+  "horizon": "20_trading_days",
+  "status": "重点观察",
+  "score": 82,
+  "confidence": 0.78,
+  "summary": "示例研究卡，仅用于验证结构，不代表真实研究结论。",
+  "core_thesis": [{"text": "示例核心逻辑", "evidence_ids": ["ev-001"], "confidence": 0.78}],
+  "bull_case": [{"text": "示例多头论点", "evidence_ids": ["ev-001"], "confidence": 0.75}],
+  "bear_case": [{"text": "示例空头论点", "evidence_ids": ["ev-002"], "confidence": 0.65}],
+  "catalysts": [{"text": "示例催化剂", "window": "未来20个交易日", "evidence_ids": ["ev-001"], "verified": false}],
+  "risk_flags": [{"text": "示例风险", "severity": "HIGH", "evidence_ids": ["ev-002"]}],
+  "invalidation_conditions": [{"condition": "示例逻辑失效", "observable": "可验证指标", "action": "转为谨慎并重新研究"}],
+  "confirmed_facts": [{"text": "示例已确认事实", "as_of": "2026-08-24T15:00:00+08:00", "evidence_ids": ["ev-001"]}],
+  "ai_inferences": [{"text": "示例 AI 推断", "confidence": 0.7, "supporting_evidence_ids": ["ev-001"], "counter_evidence_ids": ["ev-002"]}],
+  "unverified_items": [{"text": "示例待验证信息", "impact": "MEDIUM", "verification_action": "查阅公司正式公告", "deadline": null}],
+  "evidence": [
+    {"evidence_id": "ev-001", "title": "示例正式来源", "source_id": "OFFICIAL_DEMO", "source_uri": "local://fixture/official", "published_at": "2026-08-24T12:00:00+08:00", "as_of": "2026-08-24T12:00:00+08:00", "retrieved_at": "2026-08-24T18:00:00+08:00", "quality": "A", "excerpt": "示例"},
+    {"evidence_id": "ev-002", "title": "示例风险来源", "source_id": "OFFICIAL_DEMO", "source_uri": "local://fixture/risk", "published_at": "2026-08-24T12:30:00+08:00", "as_of": "2026-08-24T12:30:00+08:00", "retrieved_at": "2026-08-24T18:00:00+08:00", "quality": "A", "excerpt": "示例"}
+  ],
+  "data_freshness": {"market": {"as_of": "2026-08-24T15:00:00+08:00", "retrieved_at": "2026-08-24T18:00:00+08:00", "stale": false, "source_ids": ["OFFICIAL_DEMO"], "notes": "结构示例"}},
+  "model_notes": "结构示例，不构成投资建议。",
+  "scoring_version": "score-v1-draft",
+  "ruleset_version": "2026-08-24-planning-baseline",
+  "supersedes_research_id": null,
+  "valid_until": "2026-09-21T15:00:00+08:00"
+}

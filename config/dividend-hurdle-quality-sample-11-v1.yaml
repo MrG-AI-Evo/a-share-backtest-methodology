@@ -1,0 +1,52 @@
+schema_version: "1.0.0"
+policy_version: "dividend-hurdle-quality-sample-11-2026-09-12-pilot-v1"
+status: "MECHANISM_TEST_ONLY"
+base_policy:
+  path: "config/dividend-hurdle-backtest-v4.yaml"
+  policy_version: "dividend-hurdle-core20-2026-09-12-draft-v4"
+scope:
+  start_date: "2016-01-04"
+  end_date: "2025-12-31"
+  symbols:
+    - {symbol: "601288", name: "农业银行", sector: "银行", selection_source: "USER_FIXED_BASE"}
+    - {symbol: "000651", name: "格力电器", sector: "家电", selection_source: "RADAR_20260825"}
+    - {symbol: "601298", name: "青岛港", sector: "港口", selection_source: "USER_REQUIRED"}
+    - {symbol: "600887", name: "伊利股份", sector: "食品饮料", selection_source: "RADAR_20260825"}
+    - {symbol: "600019", name: "宝钢股份", sector: "钢铁", selection_source: "RADAR_20260825"}
+    - {symbol: "600377", name: "宁沪高速", sector: "高速", selection_source: "RADAR_20260825"}
+    - {symbol: "600886", name: "国投电力", sector: "电力", selection_source: "RADAR_20260825"}
+    - {symbol: "600660", name: "福耀玻璃", sector: "汽车零部件", selection_source: "RADAR_20260825"}
+    - {symbol: "600900", name: "长江电力", sector: "电力", selection_source: "RADAR_20260825"}
+    - {symbol: "601166", name: "兴业银行", sector: "银行", selection_source: "RADAR_20260825"}
+    - {symbol: "600919", name: "江苏银行", sector: "银行", selection_source: "RADAR_20260825"}
+sample_selection:
+  mode: "FIXED_USER_DIRECTED_CONVENIENCE_SAMPLE"
+  selected_at: "2026-09-12T12:30:00+08:00"
+  hindsight_selection_bias: true
+  formal_performance_eligible: false
+  notes:
+    - "样本来自2026-08-25高股息雷达并按现有数据覆盖优先，不代表历史时点可知的全市场选股结果。"
+    - "青岛港按用户要求固定纳入，且仅自2019-01-21实际A股行情起参与。"
+quality_gate:
+  mode: "CONSERVATIVE_ANNUAL_REPORT_PILOT"
+  rules:
+    - "latest_known_annual_report_audit_is_standard_unqualified"
+    - "no_extracted_material_going_concern_uncertainty"
+    - "latest_known_annual_report_parent_net_profit_is_positive"
+  stale_behavior: "LATEST_DISCLOSED_REPORT_REMAINS_EFFECTIVE_UNTIL_NEXT_REPORT"
+  extraction_failure_behavior: "FAIL_CLOSED"
+  formal_thresholds_frozen: false
+cd_signal:
+  mode: "MONTHLY_OBSERVED_PRODUCT_ABC_THEN_OTHER_BANK"
+  monthly_series_path: "data/backtests/staging/20260912-041500-cd-monthly-120m-v1/monthly-cd-rate-series.json"
+  missing_observation_behavior: "FAIL_CLOSED"
+  carry_or_imputation: false
+execution:
+  shares_per_entry: 1000
+  maximum_positions: 20
+  scheduler_status: "DISABLED_MANUAL_ONLY"
+change_control:
+  user_approved_at: "2026-09-12T12:30:00+08:00"
+  reason: "用户要求在农业银行之外增加十只同类高质量高股息老牌股，并固定包含青岛港。"
+  changes_formal_core20_policy: false
+

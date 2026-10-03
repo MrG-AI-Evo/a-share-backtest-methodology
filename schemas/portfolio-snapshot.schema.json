@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "portfolio-snapshot.schema.json",
+  "title": "PortfolioSnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "snapshot_id", "account_id", "as_of", "cash_cny", "market_value_cny", "nav_cny", "risk_state", "positions", "reconciliation"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "snapshot_id": {"type": "string"},
+    "account_id": {"type": "string"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "cash_cny": {"type": "number"},
+    "market_value_cny": {"type": "number"},
+    "nav_cny": {"type": "number"},
+    "gross_exposure_pct": {"type": "number", "minimum": 0},
+    "drawdown_pct": {"type": "number", "minimum": 0},
+    "risk_state": {"enum": ["NORMAL", "CAUTION", "RISK_OFF", "FROZEN"]},
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["security_id", "quantity", "sellable_quantity", "cost_cny", "market_price_cny", "market_value_cny"],
+        "properties": {
+          "security_id": {"type": "string"}, "quantity": {"type": "integer", "minimum": 0}, "sellable_quantity": {"type": "integer", "minimum": 0}, "cost_cny": {"type": "number"}, "market_price_cny": {"type": "number"}, "market_value_cny": {"type": "number"}, "thesis_status": {"enum": ["GREEN", "YELLOW", "RED", "UNKNOWN"]}
+        }
+      }
+    },
+    "exposures": {"type": "object"},
+    "reconciliation": {
+      "type": "object",
+      "required": ["status", "difference_cny"],
+      "properties": {"status": {"enum": ["PASS", "FAIL"]}, "difference_cny": {"type": "number"}, "notes": {"type": "array", "items": {"type": "string"}}}
+    }
+  }
+}

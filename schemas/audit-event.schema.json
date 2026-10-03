@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "audit-event.schema.json",
+  "title": "AuditEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id", "run_id", "event_type", "actor", "occurred_at", "payload",
+    "prev_event_hash", "event_hash"
+  ],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 8},
+    "run_id": {"type": "string", "minLength": 1},
+    "event_type": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "payload": {"type": "object"},
+    "prev_event_hash": {"type": ["string", "null"]},
+    "event_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

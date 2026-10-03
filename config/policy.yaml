@@ -1,0 +1,50 @@
+schema_version: "1.0.0"
+policy_version: "paper-v2-2026-08-25"
+mode: research_and_paper_only
+initial_cash_cny: 1000000
+benchmark: CSI300
+
+risk:
+  risk_per_trade_pct_nav: 0.50
+  risk_per_trade_hard_max_pct_nav: 0.75
+  initial_position_max_pct_nav: 8
+  single_stock_hard_max_pct_nav: 12
+  industry_max_pct_nav: 25
+  top5_max_pct_nav: 50
+  gross_exposure_max_pct_nav: 70
+  risk_off_exposure_max_pct_nav: 30
+  max_new_positions_per_day: 2
+  stop_new_buys_daily_loss_pct: 1.5
+  caution_drawdown_pct: 5
+  risk_off_drawdown_pct: 8
+  freeze_drawdown_pct: 12
+
+execution:
+  live_broker_enabled: false
+  automatic_trading_enabled: false
+  auto_approve: false
+  regular_auction_only: true
+  default_slippage_bps: 5
+  stress_slippage_bps: 15
+  fee_schedule_version: "paper-cn-a-2026-08-25-v1"
+  fees:
+    commission_rate: 0.0003
+    commission_minimum_cny: 5
+    commission_basis: "模拟盘保守假设；实际券商费率因账户而异，验证期可版本化修改"
+    stamp_duty_sell_rate: 0.0005
+    stamp_duty_basis: "印花税法千分之一基础税率，自2023-08-28减半征收"
+    transfer_fee_both_sides_rate: 0.00001
+    transfer_fee_basis: "中国结算A股成交金额0.01‰双向收取"
+
+sources:
+  - id: MOF_STAMP_DUTY_2023_39
+    url: "https://jx.mof.gov.cn/xxgk/zhengcefagui/202309/t20230904_3905337.htm"
+    effective_from: "2023-08-28"
+  - id: CHINACLEAR_SSE_FEES_2025
+    url: "https://www.chinaclear.cn/zdjs/fbzyls/202506/9d22b74d9f2e40edb67b44d1f6596f18/files/上海市场证券登记结算业务收费及代收税费一览表.pdf"
+    verified_at: "2026-08-25"
+
+notes:
+  - "本配置只用于本地模拟盘，不代表用户真实券商收费。"
+  - "paper-v2 新增：组合回撤达到 8% 时将总仓位上限收紧至 30%，并确定性执行 Top 5 持仓合计不超过 50%。"
+  - "修改费率、滑点或风险参数必须递增 policy_version / fee_schedule_version 并写审计事件。"

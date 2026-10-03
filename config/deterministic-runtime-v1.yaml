@@ -1,0 +1,78 @@
+schema_version: "1.0.0"
+runtime_id: "a-share-deterministic-runtime"
+runtime_version: "deterministic-runtime-2026-09-09-v1"
+status: "DISABLED"
+execution_mode: "MANUAL_ONLY"
+
+safety:
+  scheduler_enabled: false
+  launch_agent_enabled: false
+  cron_enabled: false
+  codex_heartbeat_enabled: false
+  automatic_test_enabled: false
+  llm_api_enabled: false
+  web_ai_chat_enabled: false
+  llm_can_write_ledger: false
+  llm_can_trade: false
+  synthetic_historical_data_allowed: false
+  real_broker_enabled: false
+  automatic_trading_enabled: false
+
+activation_gate:
+  user_approval_required: true
+  required_approval_fields:
+    - "frequency"
+    - "market_session"
+    - "stop_condition"
+    - "data_scope"
+  approval_record_required_before_scheduling: true
+
+output:
+  run_artifact_dir: "data/runtime-runs"
+  exception_package_dir: "data/exception-packages"
+  immutable_append_only: true
+  exception_package_for_manual_ai_review_only: true
+
+tasks:
+  - id: "DATA_UPDATE_VALIDATE"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "MANUAL_OR_FUTURE_APPROVED_SCHEDULE"
+    trigger: "AFTER_SOURCE_INGESTION"
+    description: "验证已导入的数据清单、来源、SHA-256和点时覆盖；不下载、不补造数据。"
+  - id: "DAILY_EXIT_CHECK"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "EACH_TRADING_DAY_AFTER_CLOSE"
+    trigger: "15:00_AFTER_CLOSE"
+    description: "以当日已知数据检查持仓退出信号；仅生成确定性待执行意图。"
+  - id: "MONTHLY_CANDIDATE_SCREEN"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "FIRST_TRADING_DAY_AFTER_CLOSE"
+    trigger: "MONTHLY_FIRST_TRADING_DAY_CLOSE"
+    description: "在空缺席位上按冻结规则筛选候选；不调用LLM。"
+  - id: "NEXT_OPEN_PAPER_FILL"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "NEXT_TRADING_DAY_OPEN"
+    trigger: "09:30_NEXT_TRADABLE_OPEN"
+    description: "按已冻结规则处理模拟成交；未知、停牌和不可成交状态均 fail closed。"
+  - id: "CORPORATE_ACTIONS_LEDGER"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "EACH_TRADING_DAY_BEFORE_OPEN"
+    trigger: "CORPORATE_ACTION_EFFECTIVE_DATE"
+    description: "处理分红、税费、公司行动和账本更新，并执行闭合检查。"
+  - id: "ANNUAL_PNL_SNAPSHOT"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "YEAR_END_AFTER_CLOSE"
+    trigger: "LAST_TRADING_DAY_CLOSE"
+    description: "输出年末快照、年度净盈亏和累计盈亏；不重复计入分红、费用、税费或滑点。"
+  - id: "EXCEPTION_EVIDENCE_PACKAGE"
+    enabled: false
+    manual_command_allowed: true
+    cadence: "AFTER_EACH_TASK"
+    trigger: "DETERMINISTIC_EXCEPTION_ONLY"
+    description: "生成仅供用户手动提交给AI复核的紧凑证据包；AI意见不可自动回写。"

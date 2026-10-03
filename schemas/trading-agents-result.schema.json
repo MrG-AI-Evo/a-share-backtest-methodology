@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "trading-agents-result.schema.json",
+  "title": "Manual TradingAgents Bridge Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_id", "bundle_id", "symbol", "as_of",
+    "adapter_version", "roles", "bull_case", "bear_case", "risk_debate",
+    "manager_synthesis"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "minLength": 8},
+    "bundle_id": {"type": "string", "minLength": 8},
+    "symbol": {"type": "string", "pattern": "^[0-9]{6}$"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "adapter_version": {"type": "string", "minLength": 1},
+    "roles": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"$ref": "#/$defs/role"}},
+    "bull_case": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/claim"}},
+    "bear_case": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/claim"}},
+    "risk_debate": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/claim"}},
+    "manager_synthesis": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/claim"}}
+  },
+  "$defs": {
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "claims", "unknowns"],
+      "properties": {
+        "role": {
+          "enum": ["MARKET", "FUNDAMENTAL", "NEWS", "SENTIMENT", "POLICY", "HOT_MONEY", "UNLOCK_REDUCTION"]
+        },
+        "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+        "unknowns": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id", "claim_type", "text", "evidence_ids",
+        "counter_evidence_ids", "confidence"
+      ],
+      "properties": {
+        "claim_id": {"type": "string", "minLength": 4},
+        "claim_type": {"enum": ["FACT", "CALCULATION", "INFERENCE", "OPINION", "UNKNOWN"]},
+        "text": {"type": "string", "minLength": 1},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "counter_evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

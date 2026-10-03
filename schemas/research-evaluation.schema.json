@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research-evaluation.schema.json",
+  "title": "Research Card Evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "research_id", "evaluated_at", "evaluator_version",
+    "passed", "score", "hard_failures", "warnings", "metrics"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "research_id": {"type": "string", "minLength": 8},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "evaluator_version": {"type": "string", "minLength": 1},
+    "passed": {"type": "boolean"},
+    "score": {"type": "number", "minimum": 0, "maximum": 100},
+    "hard_failures": {"type": "array", "items": {"type": "string"}},
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "metrics": {"type": "object", "additionalProperties": {"type": ["number", "integer", "boolean"]}}
+  }
+}

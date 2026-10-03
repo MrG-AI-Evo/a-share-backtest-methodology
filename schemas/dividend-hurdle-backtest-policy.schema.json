@@ -1,0 +1,573 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dividend-hurdle-backtest-policy.schema.json",
+  "title": "DividendHurdleBacktestPolicyV1",
+  "description": "股息率相对个人大额存单信号门槛的 point-in-time 回测策略契约。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "policy_version",
+    "status",
+    "workflow",
+    "change_control",
+    "simulation_window",
+    "information_policy",
+    "portfolio",
+    "universe",
+    "quality_gate",
+    "screening",
+    "dividend_signal",
+    "cd_hurdle",
+    "entry",
+    "exit",
+    "corporate_actions",
+    "costs_and_execution",
+    "accounting",
+    "primary_output",
+    "execution_blockers"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "policy_id": {"const": "dividend-hurdle-core20"},
+    "policy_version": {"type": "string", "minLength": 8},
+    "status": {"enum": ["DRAFT_NOT_EXECUTABLE", "FROZEN_EXECUTABLE", "RETIRED"]},
+    "workflow": {"const": "BACKTEST"},
+    "change_control": {"$ref": "#/$defs/changeControl"},
+    "simulation_window": {"$ref": "#/$defs/simulationWindow"},
+    "information_policy": {"$ref": "#/$defs/informationPolicy"},
+    "portfolio": {"$ref": "#/$defs/portfolio"},
+    "universe": {"$ref": "#/$defs/universe"},
+    "quality_gate": {"$ref": "#/$defs/qualityGate"},
+    "screening": {"$ref": "#/$defs/screening"},
+    "dividend_signal": {"$ref": "#/$defs/dividendSignal"},
+    "cd_hurdle": {"$ref": "#/$defs/cdHurdle"},
+    "entry": {"$ref": "#/$defs/entry"},
+    "exit": {"$ref": "#/$defs/exit"},
+    "corporate_actions": {"$ref": "#/$defs/corporateActions"},
+    "costs_and_execution": {"$ref": "#/$defs/costsAndExecution"},
+    "accounting": {"$ref": "#/$defs/accounting"},
+    "primary_output": {"$ref": "#/$defs/primaryOutput"},
+    "execution_blockers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/blocker"}
+    }
+  },
+  "$defs": {
+    "changeControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "created_at",
+        "reason",
+        "test_result_retuning_forbidden",
+        "next_executable_version_requires_new_policy_version"
+      ],
+      "properties": {
+        "run_id": {"type": "string", "minLength": 12},
+        "created_at": {"type": "string", "format": "date-time"},
+        "reason": {"type": "string", "minLength": 8},
+        "test_result_retuning_forbidden": {"const": true},
+        "next_executable_version_requires_new_policy_version": {"const": true}
+      }
+    },
+    "simulationWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_date", "end_date", "timezone", "calendar"],
+      "properties": {
+        "start_date": {"const": "2016-01-04"},
+        "end_date": {"const": "2026-08-24"},
+        "timezone": {"const": "Asia/Shanghai"},
+        "calendar": {"const": "POINT_IN_TIME_A_SHARE"}
+      }
+    },
+    "informationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "point_in_time_only",
+        "eligibility_rule",
+        "signal_price_basis",
+        "execution_price_basis",
+        "survivorship_bias_policy",
+        "unknown_value_policy",
+        "primary_raw_data_mode",
+        "synthetic_raw_data_allowed_in_primary_run",
+        "missing_raw_data_policy",
+        "critical_input_missing_new_entry",
+        "critical_input_missing_existing_position"
+      ],
+      "properties": {
+        "point_in_time_only": {"const": true},
+        "eligibility_rule": {"const": "known_at <= signal_at"},
+        "signal_price_basis": {"const": "RAW_UNADJUSTED"},
+        "execution_price_basis": {"const": "RAW_UNADJUSTED"},
+        "survivorship_bias_policy": {"const": "INCLUDE_HISTORICAL_DELISTED_SECURITIES"},
+        "unknown_value_policy": {"const": "UNKNOWN_NEVER_GUESS"},
+        "primary_raw_data_mode": {"const": "REAL_POINT_IN_TIME_ONLY"},
+        "synthetic_raw_data_allowed_in_primary_run": {"const": false},
+        "missing_raw_data_policy": {"const": "BLOCK_OR_UNKNOWN_NO_IMPUTATION"},
+        "critical_input_missing_new_entry": {"const": "BLOCK"},
+        "critical_input_missing_existing_position": {"const": "HOLD_WITH_DATA_GAP_AUDIT"}
+      }
+    },
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "portfolio_kind",
+        "initial_cash_cny",
+        "target_entry_shares",
+        "max_concurrent_positions",
+        "max_active_positions_per_symbol",
+        "max_external_contributions_cny",
+        "contribution_rule",
+        "reuse_sale_and_dividend_cash",
+        "automatic_withdrawals",
+        "leverage_allowed",
+        "short_selling_allowed",
+        "averaging_down_allowed",
+        "voluntary_rights_subscription"
+      ],
+      "properties": {
+        "portfolio_kind": {"const": "ON_DEMAND_FUNDED_CORE20"},
+        "initial_cash_cny": {"const": 0},
+        "target_entry_shares": {"const": 1000},
+        "max_concurrent_positions": {"const": 20},
+        "max_active_positions_per_symbol": {"const": 1},
+        "max_external_contributions_cny": {"type": ["number", "null"], "minimum": 0},
+        "contribution_rule": {"const": "EXACT_EXECUTION_CASH_SHORTFALL"},
+        "reuse_sale_and_dividend_cash": {"const": true},
+        "automatic_withdrawals": {"const": false},
+        "leverage_allowed": {"const": false},
+        "short_selling_allowed": {"const": false},
+        "averaging_down_allowed": {"const": false},
+        "voluntary_rights_subscription": {"const": false}
+      }
+    },
+    "universe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_type",
+        "ownership_scope",
+        "retain_central_soe_tag",
+        "include_later_delisted_securities",
+        "require_three_resolved_fiscal_year_dividends",
+        "require_point_in_time_trading_and_risk_status",
+        "excluded_statuses"
+      ],
+      "properties": {
+        "asset_type": {"const": "ORDINARY_A_SHARE"},
+        "ownership_scope": {"enum": ["ALL_ELIGIBLE", "CENTRAL_SOE_ONLY"]},
+        "retain_central_soe_tag": {"type": "boolean"},
+        "include_later_delisted_securities": {"const": true},
+        "require_three_resolved_fiscal_year_dividends": {"const": true},
+        "require_point_in_time_trading_and_risk_status": {"const": true},
+        "excluded_statuses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "qualityGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_version", "status", "required_profiles", "deterioration_while_held"],
+      "properties": {
+        "policy_version": {"type": ["string", "null"]},
+        "status": {"enum": ["BLOCKED_NOT_FROZEN", "FROZEN"]},
+        "required_profiles": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 4}
+        },
+        "deterioration_while_held": {"const": "WARN_ONLY_NO_AUTOMATIC_EXIT"}
+      }
+    },
+    "screening": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cadence", "signal_time", "fill_vacant_slots_only", "held_symbol_reranking_exit", "ranking"],
+      "properties": {
+        "cadence": {"const": "MONTHLY"},
+        "signal_time": {"const": "FIRST_TRADING_DAY_CLOSE"},
+        "fill_vacant_slots_only": {"const": true},
+        "held_symbol_reranking_exit": {"const": false},
+        "ranking": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "direction"],
+            "properties": {
+              "field": {"type": "string", "minLength": 1},
+              "direction": {"enum": ["ASC", "DESC"]}
+            }
+          }
+        }
+      }
+    },
+    "dividendSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal_tax_basis",
+        "core_cash_dividend_scope",
+        "special_dividend_core_treatment",
+        "upcoming_dividend_treatment",
+        "ttm",
+        "median_fiscal_years",
+        "conservative_dividend_formula",
+        "yield_formula",
+        "corporate_action_adjustment",
+        "dividend_receivable_event",
+        "dividend_cash_event",
+        "dividend_tax_event",
+        "automatic_reinvestment"
+      ],
+      "properties": {
+        "signal_tax_basis": {"const": "GROSS_PRETAX"},
+        "core_cash_dividend_scope": {"const": "ALL_ACTUAL_IMPLEMENTED_CASH_DIVIDENDS"},
+        "special_dividend_core_treatment": {"const": "INCLUDE"},
+        "upcoming_dividend_treatment": {"const": "EXCLUDE_UNTIL_EX_DATE"},
+        "ttm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lookback_calendar_days", "inclusion_event_date", "knowledge_rule"],
+          "properties": {
+            "lookback_calendar_days": {"const": 365},
+            "inclusion_event_date": {"const": "EX_DATE"},
+            "knowledge_rule": {"const": "known_at <= signal_at"}
+          }
+        },
+        "median_fiscal_years": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["observation_count", "require_fully_resolved_year", "include_zero_dividend_years"],
+          "properties": {
+            "observation_count": {"const": 3},
+            "require_fully_resolved_year": {"const": true},
+            "include_zero_dividend_years": {"const": true}
+          }
+        },
+        "conservative_dividend_formula": {"const": "min(D_ttm, D_med3)"},
+        "yield_formula": {"const": "D_cons / raw_unadjusted_close"},
+        "corporate_action_adjustment": {"const": "ONLY_EVENTS_EFFECTIVE_BY_SIGNAL_AT"},
+        "dividend_receivable_event": {"const": "EX_DATE"},
+        "dividend_cash_event": {"const": "PAY_DATE"},
+        "dividend_tax_event": {"const": "ACTUAL_LOT_BASED_WITHHOLDING_EVENT"},
+        "automatic_reinvestment": {"const": false}
+      }
+    },
+    "cdHurdle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "spread_percentage_points",
+        "hurdle_formula",
+        "rate_storage_unit",
+        "series_purpose",
+        "banks",
+        "aggregation",
+        "minimum_bank_observations",
+        "tenor_schedule",
+        "carry_policy",
+        "unavailable_policy",
+        "investable_deposit_comparator"
+      ],
+      "properties": {
+        "spread_percentage_points": {"const": 3.0},
+        "hurdle_formula": {"const": "R_cd_signal + 0.0300"},
+        "rate_storage_unit": {"const": "DECIMAL"},
+        "series_purpose": {"const": "SIGNAL_HURDLE_NOT_INVESTABLE_DEPOSIT_REPLICATION"},
+        "banks": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {"enum": ["ICBC", "ABC", "BOC", "CCB"]}
+        },
+        "aggregation": {"const": "MEDIAN"},
+        "minimum_bank_observations": {"const": 2},
+        "tenor_schedule": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["start_date", "end_date", "preferred_tenor_years", "fallback_tenor_years"],
+            "properties": {
+              "start_date": {"type": "string", "format": "date"},
+              "end_date": {"type": "string", "format": "date"},
+              "preferred_tenor_years": {"enum": [3, 5]},
+              "fallback_tenor_years": {"type": ["integer", "null"], "enum": [3, null]}
+            }
+          }
+        },
+        "carry_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary_policy", "maximum_unverified_carry_calendar_days", "sensitivity_only"],
+          "properties": {
+            "primary_policy": {"const": "OBSERVED_OR_SOURCE_VERIFIED_EFFECTIVE_WINDOW_ONLY"},
+            "maximum_unverified_carry_calendar_days": {"const": 0},
+            "sensitivity_only": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "maximum_calendar_days", "label", "included_in_primary_output"],
+              "properties": {
+                "name": {"const": "CD_RATE_180D_SYNTHETIC_CARRY"},
+                "maximum_calendar_days": {"const": 180},
+                "label": {"const": "SYNTHETIC_CARRY"},
+                "included_in_primary_output": {"const": false}
+              }
+            }
+          }
+        },
+        "unavailable_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["new_entries", "existing_positions", "audit_event"],
+          "properties": {
+            "new_entries": {"const": "BLOCK"},
+            "existing_positions": {"const": "HOLD_WITHOUT_RATE_BASED_EXIT"},
+            "audit_event": {"const": "CD_HURDLE_UNAVAILABLE"}
+          }
+        },
+        "investable_deposit_comparator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "require_minimum_purchase_amount", "require_issue_window", "require_early_withdrawal_terms"],
+          "properties": {
+            "status": {"enum": ["BLOCKED_DATASET_NOT_READY", "READY"]},
+            "require_minimum_purchase_amount": {"const": true},
+            "require_issue_window": {"const": true},
+            "require_early_withdrawal_terms": {"const": true}
+          }
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligibility_expression",
+        "equality_treatment",
+        "maximum_buy_price_formula",
+        "order_quantity_shares",
+        "order_style",
+        "execution_time",
+        "fill_price_rule",
+        "use_intraday_low_to_rescue_fill",
+        "failed_entry_retry",
+        "failed_entry_replacement_same_screen",
+        "nominal_share_price_cap_cny"
+      ],
+      "properties": {
+        "eligibility_expression": {"const": "quality_pass AND Y >= H AND vacant_slot"},
+        "equality_treatment": {"const": "ELIGIBLE"},
+        "maximum_buy_price_formula": {"const": "D_cons / H"},
+        "order_quantity_shares": {"const": 1000},
+        "order_style": {"const": "SIMULATED_OPEN_LIMIT_ALL_OR_NONE"},
+        "execution_time": {"const": "NEXT_TRADABLE_OPEN"},
+        "fill_price_rule": {"const": "raw_open_plus_adverse_slippage_not_above_limit"},
+        "use_intraday_low_to_rescue_fill": {"const": false},
+        "failed_entry_retry": {"const": "NEXT_MONTHLY_SCREEN"},
+        "failed_entry_replacement_same_screen": {"const": false},
+        "nominal_share_price_cap_cny": {"type": ["number", "null"], "exclusiveMinimum": 0}
+      }
+    },
+    "exit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal_cadence",
+        "trigger_expression",
+        "equality_treatment",
+        "execution_time",
+        "quantity_rule",
+        "queue_when_untradeable",
+        "synthetic_last_close_exit_allowed",
+        "reentry_rule",
+        "backtest_end_open_positions"
+      ],
+      "properties": {
+        "signal_cadence": {"const": "EACH_TRADING_DAY_CLOSE"},
+        "trigger_expression": {"const": "Y < H"},
+        "equality_treatment": {"const": "HOLD"},
+        "execution_time": {"const": "NEXT_TRADABLE_OPEN"},
+        "quantity_rule": {"const": "SELL_ALL_CORPORATE_ACTION_ADJUSTED_SHARES"},
+        "queue_when_untradeable": {"const": true},
+        "synthetic_last_close_exit_allowed": {"const": false},
+        "reentry_rule": {"const": "FUTURE_MONTHLY_SCREEN_ONLY"},
+        "backtest_end_open_positions": {"const": "MARK_TO_MARKET_NO_FORCED_LIQUIDATION"}
+      }
+    },
+    "corporateActions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cash_dividend",
+        "bonus_split_merge",
+        "voluntary_rights_issue",
+        "mandatory_cash_or_security_event",
+        "unresolved_terminal_security"
+      ],
+      "properties": {
+        "cash_dividend": {"const": "RECEIVABLE_AT_EX_DATE_CASH_AT_PAY_DATE"},
+        "bonus_split_merge": {"const": "ADJUST_QUANTITY_AND_UNIT_COST"},
+        "voluntary_rights_issue": {"const": "DO_NOT_SUBSCRIBE"},
+        "mandatory_cash_or_security_event": {"const": "APPLY_HISTORICAL_EXECUTABLE_TERMS"},
+        "unresolved_terminal_security": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["carrying_value_policy", "retain_last_observable_reference", "status"],
+          "properties": {
+            "carrying_value_policy": {"const": "ZERO_REALIZABLE_LOWER_BOUND"},
+            "retain_last_observable_reference": {"const": true},
+            "status": {"const": "UNRESOLVED"}
+          }
+        }
+      }
+    },
+    "costsAndExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fee_schedule_version",
+        "slippage_schedule_version",
+        "status",
+        "date_effective_statutory_fees_required",
+        "broker_commission_and_minimum_required",
+        "lot_based_dividend_tax_required",
+        "required_cost_components",
+        "slippage_accounting_rule",
+        "dividend_tax_accounting_rule",
+        "scenarios",
+        "same_timestamp_event_order"
+      ],
+      "properties": {
+        "fee_schedule_version": {"type": ["string", "null"]},
+        "slippage_schedule_version": {"type": ["string", "null"]},
+        "status": {"enum": ["BLOCKED_NOT_FROZEN", "FROZEN"]},
+        "date_effective_statutory_fees_required": {"const": true},
+        "broker_commission_and_minimum_required": {"const": true},
+        "lot_based_dividend_tax_required": {"const": true},
+        "required_cost_components": {
+          "type": "array",
+          "minItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "BROKER_COMMISSION",
+              "MINIMUM_COMMISSION",
+              "STAMP_DUTY",
+              "TRANSFER_FEE",
+              "EXCHANGE_AND_REGULATORY_FEES",
+              "OTHER_CASH_FEES",
+              "DIVIDEND_TAX",
+              "SLIPPAGE_ATTRIBUTION"
+            ]
+          }
+        },
+        "slippage_accounting_rule": {"const": "EMBEDDED_IN_FILL_PRICE_NOT_ADDED_AGAIN_AS_CASH_FEE"},
+        "dividend_tax_accounting_rule": {"const": "LOT_BASED_SEPARATE_FROM_SELL_TRANSACTION_COSTS"},
+        "scenarios": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {"enum": ["OPTIMISTIC", "BASE", "STRESS"]}
+        },
+        "same_timestamp_event_order": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "MANDATORY_CORPORATE_ACTIONS_AND_AVAILABLE_CASH"},
+            {"const": "SELL_FILLS"},
+            {"const": "BUY_FILLS_IN_FROZEN_RANK_ORDER"},
+            {"const": "END_OF_DAY_VALUATION"}
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "shared_cash_account",
+        "external_contribution_attribution",
+        "total_assets_formula",
+        "equity_formula",
+        "total_pnl_formula",
+        "simple_return_formula",
+        "simple_return_zero_denominator",
+        "security_lifecycle_value_formula",
+        "security_total_pnl_formula",
+        "required_return_measures",
+        "reconciliation_tolerance_cny"
+      ],
+      "properties": {
+        "currency": {"const": "CNY"},
+        "shared_cash_account": {"const": true},
+        "external_contribution_attribution": {"const": "ORDER_CAUSING_CASH_SHORTFALL"},
+        "total_assets_formula": {"const": "cash + receivables + market_value"},
+        "equity_formula": {"const": "total_assets - liabilities"},
+        "total_pnl_formula": {"const": "equity + cumulative_withdrawals - cumulative_contributions"},
+        "simple_return_formula": {"const": "total_pnl / cumulative_contributions"},
+        "simple_return_zero_denominator": {"type": "null"},
+        "security_lifecycle_value_formula": {"const": "net_sell_proceeds + net_dividends + dividend_receivable + current_market_value"},
+        "security_total_pnl_formula": {"const": "security_lifecycle_value - cumulative_buy_cost_including_fees"},
+        "required_return_measures": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {"enum": ["SIMPLE_RETURN", "MWRR_XIRR", "TWR"]}
+        },
+        "reconciliation_tolerance_cny": {"const": 0.01}
+      }
+    },
+    "primaryOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cohort", "required_benchmarks", "required_sensitivity_runs", "performance_claims_allowed"],
+      "properties": {
+        "cohort": {"const": "CORE20"},
+        "required_benchmarks": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 3}
+        },
+        "required_sensitivity_runs": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 3}
+        },
+        "performance_claims_allowed": {"const": false}
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "description"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+        "status": {"enum": ["OPEN", "CLOSED"]},
+        "description": {"type": "string", "minLength": 8}
+      }
+    }
+  }
+}

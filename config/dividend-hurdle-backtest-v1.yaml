@@ -1,0 +1,259 @@
+schema_version: "1.0.0"
+policy_id: "dividend-hurdle-core20"
+policy_version: "dividend-hurdle-core20-2026-08-25-draft-v1"
+status: "DRAFT_NOT_EXECUTABLE"
+workflow: "BACKTEST"
+
+change_control:
+  run_id: "20260825-172222-backtest-spec-dh01"
+  created_at: "2026-08-25T17:22:22+08:00"
+  reason: "固化股息率相对大额存单门槛策略、按需注资以及总账户和单股子账口径。"
+  test_result_retuning_forbidden: true
+  next_executable_version_requires_new_policy_version: true
+
+simulation_window:
+  start_date: "2016-01-04"
+  end_date: "2026-08-24"
+  timezone: "Asia/Shanghai"
+  calendar: "POINT_IN_TIME_A_SHARE"
+
+information_policy:
+  point_in_time_only: true
+  eligibility_rule: "known_at <= signal_at"
+  signal_price_basis: "RAW_UNADJUSTED"
+  execution_price_basis: "RAW_UNADJUSTED"
+  survivorship_bias_policy: "INCLUDE_HISTORICAL_DELISTED_SECURITIES"
+  unknown_value_policy: "UNKNOWN_NEVER_GUESS"
+  primary_raw_data_mode: "REAL_POINT_IN_TIME_ONLY"
+  synthetic_raw_data_allowed_in_primary_run: false
+  missing_raw_data_policy: "BLOCK_OR_UNKNOWN_NO_IMPUTATION"
+  critical_input_missing_new_entry: "BLOCK"
+  critical_input_missing_existing_position: "HOLD_WITH_DATA_GAP_AUDIT"
+
+portfolio:
+  portfolio_kind: "ON_DEMAND_FUNDED_CORE20"
+  initial_cash_cny: 0
+  target_entry_shares: 1000
+  max_concurrent_positions: 20
+  max_active_positions_per_symbol: 1
+  max_external_contributions_cny: null
+  contribution_rule: "EXACT_EXECUTION_CASH_SHORTFALL"
+  reuse_sale_and_dividend_cash: true
+  automatic_withdrawals: false
+  leverage_allowed: false
+  short_selling_allowed: false
+  averaging_down_allowed: false
+  voluntary_rights_subscription: false
+
+universe:
+  asset_type: "ORDINARY_A_SHARE"
+  ownership_scope: "ALL_ELIGIBLE"
+  retain_central_soe_tag: true
+  include_later_delisted_securities: true
+  require_three_resolved_fiscal_year_dividends: true
+  require_point_in_time_trading_and_risk_status: true
+  excluded_statuses:
+    - "ST"
+    - "STAR_ST"
+    - "DELISTING_PERIOD"
+    - "SUSPENDED_FROM_LISTING"
+    - "UNSUPPORTED_ASSET"
+
+quality_gate:
+  policy_version: null
+  status: "BLOCKED_NOT_FROZEN"
+  required_profiles:
+    - "GENERAL_IDENTITY_AUDIT_GOING_CONCERN"
+    - "NON_FINANCIAL_PROFIT_CASHFLOW_SOLVENCY_DIVIDEND_COVER"
+    - "BANK_CAPITAL_ASSET_QUALITY_PROVISION_PROFIT"
+    - "INSURER_SOLVENCY_RISK_RATING_PROFIT"
+    - "BROKER_NET_CAPITAL_RISK_CONTROL_PROFIT"
+  deterioration_while_held: "WARN_ONLY_NO_AUTOMATIC_EXIT"
+
+screening:
+  cadence: "MONTHLY"
+  signal_time: "FIRST_TRADING_DAY_CLOSE"
+  fill_vacant_slots_only: true
+  held_symbol_reranking_exit: false
+  ranking:
+    - field: "yield_buffer"
+      direction: "DESC"
+    - field: "dividend_observation_completeness"
+      direction: "DESC"
+    - field: "median_trading_amount_20d_cny"
+      direction: "DESC"
+    - field: "symbol"
+      direction: "ASC"
+
+dividend_signal:
+  signal_tax_basis: "GROSS_PRETAX"
+  core_cash_dividend_scope: "ALL_ACTUAL_IMPLEMENTED_CASH_DIVIDENDS"
+  special_dividend_core_treatment: "INCLUDE"
+  upcoming_dividend_treatment: "EXCLUDE_UNTIL_EX_DATE"
+  ttm:
+    lookback_calendar_days: 365
+    inclusion_event_date: "EX_DATE"
+    knowledge_rule: "known_at <= signal_at"
+  median_fiscal_years:
+    observation_count: 3
+    require_fully_resolved_year: true
+    include_zero_dividend_years: true
+  conservative_dividend_formula: "min(D_ttm, D_med3)"
+  yield_formula: "D_cons / raw_unadjusted_close"
+  corporate_action_adjustment: "ONLY_EVENTS_EFFECTIVE_BY_SIGNAL_AT"
+  dividend_receivable_event: "EX_DATE"
+  dividend_cash_event: "PAY_DATE"
+  dividend_tax_event: "ACTUAL_LOT_BASED_WITHHOLDING_EVENT"
+  automatic_reinvestment: false
+
+cd_hurdle:
+  spread_percentage_points: 3.0
+  hurdle_formula: "R_cd_signal + 0.0300"
+  rate_storage_unit: "DECIMAL"
+  series_purpose: "SIGNAL_HURDLE_NOT_INVESTABLE_DEPOSIT_REPLICATION"
+  banks:
+    - "ICBC"
+    - "ABC"
+    - "BOC"
+    - "CCB"
+  aggregation: "MEDIAN"
+  minimum_bank_observations: 2
+  tenor_schedule:
+    - start_date: "2016-01-04"
+      end_date: "2017-12-31"
+      preferred_tenor_years: 3
+      fallback_tenor_years: null
+    - start_date: "2018-01-01"
+      end_date: "2026-08-24"
+      preferred_tenor_years: 5
+      fallback_tenor_years: 3
+  carry_policy:
+    primary_policy: "OBSERVED_OR_SOURCE_VERIFIED_EFFECTIVE_WINDOW_ONLY"
+    maximum_unverified_carry_calendar_days: 0
+    sensitivity_only:
+      name: "CD_RATE_180D_SYNTHETIC_CARRY"
+      maximum_calendar_days: 180
+      label: "SYNTHETIC_CARRY"
+      included_in_primary_output: false
+  unavailable_policy:
+    new_entries: "BLOCK"
+    existing_positions: "HOLD_WITHOUT_RATE_BASED_EXIT"
+    audit_event: "CD_HURDLE_UNAVAILABLE"
+  investable_deposit_comparator:
+    status: "BLOCKED_DATASET_NOT_READY"
+    require_minimum_purchase_amount: true
+    require_issue_window: true
+    require_early_withdrawal_terms: true
+
+entry:
+  eligibility_expression: "quality_pass AND Y >= H AND vacant_slot"
+  equality_treatment: "ELIGIBLE"
+  maximum_buy_price_formula: "D_cons / H"
+  order_quantity_shares: 1000
+  order_style: "SIMULATED_OPEN_LIMIT_ALL_OR_NONE"
+  execution_time: "NEXT_TRADABLE_OPEN"
+  fill_price_rule: "raw_open_plus_adverse_slippage_not_above_limit"
+  use_intraday_low_to_rescue_fill: false
+  failed_entry_retry: "NEXT_MONTHLY_SCREEN"
+  failed_entry_replacement_same_screen: false
+  nominal_share_price_cap_cny: null
+
+exit:
+  signal_cadence: "EACH_TRADING_DAY_CLOSE"
+  trigger_expression: "Y < H"
+  equality_treatment: "HOLD"
+  execution_time: "NEXT_TRADABLE_OPEN"
+  quantity_rule: "SELL_ALL_CORPORATE_ACTION_ADJUSTED_SHARES"
+  queue_when_untradeable: true
+  synthetic_last_close_exit_allowed: false
+  reentry_rule: "FUTURE_MONTHLY_SCREEN_ONLY"
+  backtest_end_open_positions: "MARK_TO_MARKET_NO_FORCED_LIQUIDATION"
+
+corporate_actions:
+  cash_dividend: "RECEIVABLE_AT_EX_DATE_CASH_AT_PAY_DATE"
+  bonus_split_merge: "ADJUST_QUANTITY_AND_UNIT_COST"
+  voluntary_rights_issue: "DO_NOT_SUBSCRIBE"
+  mandatory_cash_or_security_event: "APPLY_HISTORICAL_EXECUTABLE_TERMS"
+  unresolved_terminal_security:
+    carrying_value_policy: "ZERO_REALIZABLE_LOWER_BOUND"
+    retain_last_observable_reference: true
+    status: "UNRESOLVED"
+
+costs_and_execution:
+  fee_schedule_version: null
+  slippage_schedule_version: null
+  status: "BLOCKED_NOT_FROZEN"
+  date_effective_statutory_fees_required: true
+  broker_commission_and_minimum_required: true
+  lot_based_dividend_tax_required: true
+  required_cost_components:
+    - "BROKER_COMMISSION"
+    - "MINIMUM_COMMISSION"
+    - "STAMP_DUTY"
+    - "TRANSFER_FEE"
+    - "EXCHANGE_AND_REGULATORY_FEES"
+    - "OTHER_CASH_FEES"
+    - "DIVIDEND_TAX"
+    - "SLIPPAGE_ATTRIBUTION"
+  slippage_accounting_rule: "EMBEDDED_IN_FILL_PRICE_NOT_ADDED_AGAIN_AS_CASH_FEE"
+  dividend_tax_accounting_rule: "LOT_BASED_SEPARATE_FROM_SELL_TRANSACTION_COSTS"
+  scenarios:
+    - "OPTIMISTIC"
+    - "BASE"
+    - "STRESS"
+  same_timestamp_event_order:
+    - "MANDATORY_CORPORATE_ACTIONS_AND_AVAILABLE_CASH"
+    - "SELL_FILLS"
+    - "BUY_FILLS_IN_FROZEN_RANK_ORDER"
+    - "END_OF_DAY_VALUATION"
+
+accounting:
+  currency: "CNY"
+  shared_cash_account: true
+  external_contribution_attribution: "ORDER_CAUSING_CASH_SHORTFALL"
+  total_assets_formula: "cash + receivables + market_value"
+  equity_formula: "total_assets - liabilities"
+  total_pnl_formula: "equity + cumulative_withdrawals - cumulative_contributions"
+  simple_return_formula: "total_pnl / cumulative_contributions"
+  simple_return_zero_denominator: null
+  security_lifecycle_value_formula: "net_sell_proceeds + net_dividends + dividend_receivable + current_market_value"
+  security_total_pnl_formula: "security_lifecycle_value - cumulative_buy_cost_including_fees"
+  required_return_measures:
+    - "SIMPLE_RETURN"
+    - "MWRR_XIRR"
+    - "TWR"
+  reconciliation_tolerance_cny: 0.01
+
+primary_output:
+  cohort: "CORE20"
+  required_benchmarks:
+    - "CSI300_TOTAL_RETURN"
+    - "ELIGIBLE_POOL_EQUAL_WEIGHT"
+    - "QUALITY_ONLY_NO_RATE_TIMING"
+  required_sensitivity_runs:
+    - "CENTRAL_SOE_ONLY"
+    - "EXCLUDE_TAGGED_SPECIAL_DIVIDENDS"
+    - "PREDECLARED_HYSTERESIS"
+    - "CD_RATE_180D_SYNTHETIC_CARRY"
+    - "ALL_ELIGIBLE_CAPACITY_DIAGNOSTIC"
+  performance_claims_allowed: false
+
+execution_blockers:
+  - id: "CD_HISTORY"
+    status: "OPEN"
+    description: "四大行历史大额存单观察值、有效期、来源和延续标识未形成可审计数据集。"
+  - id: "QUALITY_GATE"
+    status: "OPEN"
+    description: "通用与分行业质量门的数值阈值和历史生效期未冻结。"
+  - id: "FEE_TAX_RULES"
+    status: "OPEN"
+    description: "2016–2026 费用、红利税、交易规则和滑点版本未完整冻结。"
+  - id: "POINT_IN_TIME_COVERAGE"
+    status: "OPEN"
+    description: "全市场、退市股、风险状态、财务和公司行动的 point-in-time 覆盖未验收。"
+  - id: "LEDGER_IMPLEMENTATION"
+    status: "OPEN"
+    description: "总账户与单股账本尚未接入确定性回测引擎并完成闭合测试。"
+  - id: "WEB_INSPECTOR"
+    status: "OPEN"
+    description: "V1 Web 已完成基础页面，但本股息门槛回测的检查点、子账与证据查看器尚未接入。"

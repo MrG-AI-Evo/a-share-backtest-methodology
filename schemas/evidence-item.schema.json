@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-item.schema.json",
+  "title": "EvidenceItem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evidence_id", "security_id", "evidence_type", "statement", "source", "published_at", "as_of", "retrieved_at", "quality_grade", "raw_ref"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "evidence_id": {"type": "string", "minLength": 8},
+    "security_id": {"type": ["string", "null"]},
+    "evidence_type": {"enum": ["MARKET_DATA", "FINANCIAL", "FILING", "NEWS", "POLICY", "CORPORATE_ACTION", "SENTIMENT", "RULE", "OTHER"]},
+    "statement": {"type": "string", "minLength": 1},
+    "value": {},
+    "unit": {"type": ["string", "null"]},
+    "currency": {"type": ["string", "null"]},
+    "period": {"type": ["string", "null"]},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "tier", "uri_or_dataset", "license_status"],
+      "properties": {
+        "source_id": {"type": "string"},
+        "tier": {"enum": ["P0", "P1", "P2", "P3", "P4"]},
+        "uri_or_dataset": {"type": "string"},
+        "license_status": {"enum": ["APPROVED_PERSONAL_RESEARCH", "REVIEW_REQUIRED", "RESTRICTED", "UNKNOWN"]}
+      }
+    },
+    "published_at": {"type": ["string", "null"], "format": "date-time"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "retrieved_at": {"type": "string", "format": "date-time"},
+    "quality_grade": {"enum": ["A", "B", "C", "D", "F"]},
+    "independent_event_id": {"type": ["string", "null"]},
+    "raw_ref": {"type": "string"},
+    "content_hash": {"type": ["string", "null"]},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  }
+}

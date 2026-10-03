@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "exception-evidence-package.schema.json",
+  "title": "ExceptionEvidencePackage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "package_id", "source_run_id", "created_at", "manual_ai_review_only", "automatic_writeback_allowed", "items"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"}, "package_id": {"type": "string", "minLength": 12}, "source_run_id": {"type": "string", "minLength": 12}, "created_at": {"type": "string", "format": "date-time"}, "manual_ai_review_only": {"const": true}, "automatic_writeback_allowed": {"const": false}, "items": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["code", "severity", "message", "evidence_refs", "suggested_human_action"], "properties": {"code": {"type": "string"}, "severity": {"enum": ["INFO", "WARNING", "BLOCKER", "CRITICAL"]}, "message": {"type": "string"}, "evidence_refs": {"type": "array", "items": {"type": "string"}}, "suggested_human_action": {"type": "string"}}}}
+  }
+}

@@ -1,0 +1,62 @@
+[project]
+name = "a-share-terminal-api"
+version = "0.1.0"
+description = "Local-only API for the A-share research and paper-trading terminal"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "aiosqlite>=0.20,<1",
+  "duckdb>=1.4,<2",
+  "fastapi>=0.116,<1",
+  "fonttools>=4.59,<5",
+  "httpx>=0.25.2,<0.26",
+  "jsonschema>=4.25,<5",
+  "pypdf>=6.10,<7",
+  "pydantic-settings>=2.10,<3",
+  "pyyaml>=6.0,<7",
+  "uvicorn[standard]>=0.35,<1",
+  "cryptography>=46,<47",
+]
+
+[project.optional-dependencies]
+mootdx = ["mootdx==0.11.7"]
+akshare = ["akshare>=1.17,<2"]
+public-data = ["mootdx==0.11.7", "akshare>=1.17,<2", "baostock==0.8.9"]
+
+[dependency-groups]
+dev = [
+  "mypy>=1.17,<2",
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.1,<2",
+  "respx>=0.22,<1",
+  "ruff>=0.12,<1",
+  "types-jsonschema>=4.25,<5",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["yaml", "yaml.*"]
+ignore_missing_imports = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
