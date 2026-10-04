@@ -1,5 +1,7 @@
 schema_version: "1.0.0"
 verified_at: "2026-09-10"
+# 历史上游清单仅供追溯；WorkBuddy 按数据契约自主选择来源。
+# 本清单不要求安装任何条目，也不规定新平台的数据源优先级。
 runtime_policy: "V1_MANUAL_BRIDGE_NO_LLM_API"
 upstreams:
   - id: a-share-skill

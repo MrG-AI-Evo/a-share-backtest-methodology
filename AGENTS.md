@@ -25,7 +25,7 @@
 - 不可做：真实券商连接、真实订单、自动交易、凭据管理、收益保证、面向公众的荐股服务。
 - V1 不可做：任何 LLM API、Web 内 AI 聊天、云服务器、Level-2/付费终端、QMT 实盘。
 - 低 Token 运行时必须保持 `DISABLED + MANUAL_ONLY`，除非用户明确批准频率与停止条件；不得新建 heartbeat、cron、LaunchAgent 或自动测试来替代人工启动。
-- Tushare：仅保留 adapter 接口和评估记录；未获新指令不得购买或接入。
+- 数据来源由 WorkBuddy 按 `docs/data-integration-contract.md` 自主查找和选择；既有接口与上游清单只是旧环境的实现记录，不是新平台的指定供应商或获取顺序。新增付费服务或扩大数据授权范围须由用户另行决定。
 
 ## Task Protocol
 
@@ -55,7 +55,7 @@
 
 | 任务 | 首选 | 备选/说明 |
 |---|---|---|
-| 行情/K线/技术指标 | a-share-skill adapter | 字段级公共源降级；确定性代码复算关键指标 |
+| 行情/K线/技术指标 | WorkBuddy 自主选择合格来源，经 adapter 接入 | 字段级来源与时间戳保留；确定性代码复算关键指标 |
 | 模拟账户能力参考 | a-share-paper-trading | 核心账本仍须接受本项目审计与规则门 |
 | 主研究链 | TradingAgents-astock adapter | 其角色输出映射到本项目 evidence/claim schema |
 | 深度尽调 | UZI-Skill adapter | 仅限少数候选；报告结论不是事实源 |
@@ -104,7 +104,7 @@ Codex 只改变代码、配置和依赖；不能成为 Web 运行时组件。
 ## Live Universe Protocol
 
 - 正式全市场采集使用 `universe:collect/screening:live`：仅允许当日交易日 15:00 后，必须同时包含 SSE/SZSE/BSE，逐交易所记录上市数、quote 数和覆盖率。
-- 当前链路：沪深列表/快照/不复权日线与沪深300基准用 mootdx；北交所列表用北交所官网；缺失沪深快照与北交所快照用腾讯；北交所历史用新浪并明确成交额代理计算。
+- WorkBuddy 自主寻找满足契约的数据源；旧环境的 mootdx、交易所官网、腾讯、新浪链路仅是历史实现，不是迁移后的接口或优先级要求。对 SSE/SZSE/BSE 分别验证证券身份、交易日、行情覆盖和字段真实口径。
 - 每个字段按其真实周期命名。当日换手率不得写入 `turnover_20d_pct`；缺失就保持 `null` 并接受评分惩罚。
 - 覆盖率任一交易所 <95%、北交所报告日不一致或可筛选标的 <300 时，只保留快照，拒绝正式 Top30。
 - 发现已落筛选 run 存在语义错误时，追加 `screening-invalidation`，由 `replacement_run_id` 替代；禁止删除、覆盖或静默继续使用。

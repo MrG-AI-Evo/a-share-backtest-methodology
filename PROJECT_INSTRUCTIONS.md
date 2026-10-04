@@ -125,7 +125,7 @@
 
 ## 10. Skill 与 UI 质量门
 
-- `a-share-skill` 只作为行情/指标/事件/模拟工具层；`TradingAgents-astock` 是研究框架；`UZI-Skill` 仅限最终 3–5 只候选；Tushare 不安装。
+- 旧行情工具与供应商是原环境的可选实现，不作为 WorkBuddy 的数据来源要求。WorkBuddy 按数据契约自行选择可追溯来源并通过 adapter 接入；研究框架和深度尽调仍受结构化输出与数量预算约束。新增付费服务须由用户另行决定。
 - UI 设计使用 `emil-design-eng`、`apple-design` 确定高密度界面、反馈、排版和克制动效。
 - 每个页面完成后用 `web-design-guidelines` 做响应式、语义、键盘和无障碍审查。
 - 动效进入实现前先用 `find-animation-opportunities` 证明其必要性；已有动效用 `improve-animations` 形成计划，提交前用 `review-animations` 审查；`animation-vocabulary` 统一术语。

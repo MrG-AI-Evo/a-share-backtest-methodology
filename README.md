@@ -23,11 +23,13 @@
 ```bash
 pnpm install --frozen-lockfile
 cd apps/api
-uv sync --frozen --extra mootdx
+uv sync --frozen
 cd ../..
 ```
 
 两个终端分别执行 `pnpm dev:api` 和 `pnpm dev:web`。访问 `http://127.0.0.1:3000/backtests`；API 健康端点为 `http://127.0.0.1:8000/health`。
+
+数据来源由 WorkBuddy 根据 [所需数据与验收条件](docs/data-integration-contract.md) 自主查找；仓库里的旧供应商适配器只是可复用代码，不规定新平台使用哪个接口。
 
 无数据启动是预期状态：回测列表为空、历史样本报告不存在、正式运行状态为 `BLOCKED`。服务启动会在本地产生被 Git 忽略的空数据库；普通行情页面可能按现有适配器访问公共源，不等于已获得十年回测所需数据。
 

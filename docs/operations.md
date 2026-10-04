@@ -14,7 +14,7 @@
 
 ```bash
 pnpm install
-cd apps/api && uv sync --extra mootdx
+cd apps/api && uv sync --frozen
 ```
 
 依赖升级不是日常启动步骤。升级前必须记录版本、许可证和回归结果。

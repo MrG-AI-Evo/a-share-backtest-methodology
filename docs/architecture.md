@@ -129,7 +129,7 @@ SQLite 开启 WAL、foreign keys、busy timeout；写操作使用短事务。数
 
 ### 5.1 Market Data Plane
 
-- `SourceAdapter`：mootdx、腾讯、东财、新浪、同花顺、财联社、百度、AKShare。
+- `SourceAdapter`：由 WorkBuddy 选择满足字段、时间和许可要求的来源；原有具体供应商 adapter 仅供复用，不构成迁移目标的优先级。
 - `RateLimiter/Cache`：按域名串行/并发预算、缓存、指数退避和熔断。
 - `Normalizer`：证券 ID、交易所、时区、单位、OHLCV、复权、报告期。
 - `FieldResolver`：字段级选源、冲突容差、质量和 stale 判定。
@@ -240,7 +240,7 @@ Server Components 构建页面壳和首屏数据，ECharts/需要交互的组件
 - `UZIAdapter`：只接受最终 3–5 只候选和明确尽调问题，报告拆成证据/计算/观点。
 - `TushareAdapter`：接口占位，V1 禁用且无依赖。
 
-当前 `mootdx 0.11.7` 作为独立公共行情 adapter 已安装并锁定 tag/commit，只提供已核验的不复权 K 线备援；AKShare 1.18.94 虽已安装，但因其东方财富底层端点实探失败而由配置显式禁用。三个研究上游尚未执行其运行时代码，精确 commit 必须在真正安装前冻结。
+原环境曾使用 mootdx 与 AKShare adapter；其当时的探针结果不适用于 WorkBuddy 新环境，也不指定新平台的数据获取方案。任何实际采用的新来源都需冻结依赖版本并通过字段、时点、覆盖和降级测试。
 
 ## 10. 响应式与触控架构
 
